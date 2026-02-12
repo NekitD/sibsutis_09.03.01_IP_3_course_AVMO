@@ -1,7 +1,7 @@
 import math
 
 class Fract:
-    def __init__(self, upper, lower):
+    def __init__(self, upper, lower=1):
         if lower == 0:
             raise ValueError("Знаменатель не может быть 0!")
         if lower < 0:
@@ -11,11 +11,11 @@ class Fract:
         self.lower = lower
         self.reduce()
 
-    def __print__(self):
+    def __str__(self):
         if self.upper % self.lower == 0:
-            print(self.upper // self.lower)
+            return str(self.upper // self.lower)
         else:
-            print(f'({self.upper}/{self.lower})')
+            return f'({self.upper}/{self.lower})'
 
     def reduce(self):
         gcd = math.gcd(self.upper, self.lower)
@@ -61,20 +61,36 @@ class Fract:
 def parse_matrix(matrix_str):
     rows = matrix_str.strip().split('\n')
     left_matrix = []  
-    right_vector = []  
+    right_vector = []   
     for row in rows:
         left, right = row.strip().split('|')
-
-        left_part = list(map(int, left.strip().split()))
-        right_part = int(right.strip())
-
+        left_parts = left.strip().split()
+        left_part = []
+        for num in left_parts:
+            if '/' in num:
+                up, low = map(int, num.split('/'))
+                left_part.append(Fract(up, low))
+            else:
+                left_part.append(Fract(int(num)))
+        right_str = right.strip()
+        if '/' in right_str:
+            up, low = map(int, right_str.split('/'))
+            right_part = Fract(up, low)
+        else:
+            right_part = Fract(int(right_str))
+        
         left_matrix.append(left_part)
         right_vector.append(right_part)
+    
     return left_matrix, right_vector
 
-def print_matrix(left, right):
-    for i in range(len(left)):
-        print(*[f"{x:6d}" for x in left[i]], f" | {right[i]:6d}")
+def print_matrix(left_matrix, right_vector):
+    for i in range(len(left_matrix)):
+        row_str = ""
+        for j in range(len(left_matrix[i])):
+            row_str += f"{str(left_matrix[i][j]):>8} "
+        row_str += f"| {str(right_vector[i])}"
+        print(row_str)
 
 if __name__ == "__main__":
     path = ".\Лабы\Лаба2\matrix"
