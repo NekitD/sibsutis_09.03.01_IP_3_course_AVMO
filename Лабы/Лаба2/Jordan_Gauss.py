@@ -5,8 +5,8 @@ def parse_matrix(matrix_str):
     for row in rows:
         left, right = row.strip().split('|')
 
-        left_part = list(map(float, left.strip().split()))
-        right_part = float(right.strip())
+        left_part = list(map(int, left.strip().split()))
+        right_part = int(right.strip())
 
         left_matrix.append(left_part)
         right_vector.append(right_part)
@@ -14,7 +14,7 @@ def parse_matrix(matrix_str):
 
 def print_matrix(left, right):
     for i in range(len(left)):
-        print(*[f"{x:8.2f}" for x in left[i]], f" | {right[i]:8.2f}")
+        print(*[f"{x:6d}" for x in left[i]], f" | {right[i]:6d}")
 
 if __name__ == "__main__":
     path = ".\Лабы\Лаба2\matrix"
