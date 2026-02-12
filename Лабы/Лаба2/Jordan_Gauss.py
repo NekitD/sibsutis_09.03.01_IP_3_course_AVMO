@@ -17,6 +17,7 @@ def print_matrix(left, right):
         print(*[f"{x:8.2f}" for x in left[i]], f" | {right[i]:8.2f}")
 
 if __name__ == "__main__":
+    path = ".\Лабы\Лаба2\matrix"
     print(80 * "-")
     print( (20 * " ") + "Лабораторная работа №2" + (20 * " "))
     print( (20 * " ") + "МЕТОД ЖОРДАНА-ГАУССА" + (20 * " "))
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     name = input()
     if not name.__contains__(".txt"):
         name = name + ".txt"
-    f_matrix = open(f'.\Лабы\Лаба2\matrix\{name}', "r")
+    f_matrix = open(f'{path}\{name}', "r")
     s_matrix = f_matrix.read()
     f_matrix.close()
 
