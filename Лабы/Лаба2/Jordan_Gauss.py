@@ -1,3 +1,63 @@
+import math
+
+class Fract:
+    def __init__(self, upper, lower):
+        if lower == 0:
+            raise ValueError("Знаменатель не может быть 0!")
+        if lower < 0:
+            upper = -upper
+            lower = -lower
+        self.upper = upper
+        self.lower = lower
+        self.reduce()
+
+    def __print__(self):
+        if self.upper % self.lower == 0:
+            print(self.upper // self.lower)
+        else:
+            print(f'({self.upper}/{self.lower})')
+
+    def reduce(self):
+        gcd = math.gcd(self.upper, self.lower)
+        self.upper //= gcd
+        self.lower //= gcd
+
+    def __mul__(self, x):
+        if isinstance(x, Fract):
+            return Fract(self.upper * x.upper, self.lower * x.lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper * x, self.lower)
+        else:
+            raise TypeError("Ошибка умножения дроби!")
+
+    def __truediv__(self, x):
+        if isinstance(x, Fract):
+            return Fract(self.upper * x.lower, self.lower * x.upper)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper, self.lower * x)
+        else:
+            raise TypeError("Ошибка деления дроби!")
+
+    def __add__(self, x):
+        if isinstance(x, Fract):
+            new_upper = self.upper * x.lower + x.upper * self.lower
+            new_lower = self.lower * x.lower
+            return Fract(new_upper, new_lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper + x * self.lower, self.lower)
+        else:
+            raise TypeError("Ошибка сложения дробей!")
+
+    def __sub__(self, x):
+        if isinstance(x, Fract):
+            new_upper = self.upper * x.lower - x.upper * self.lower
+            new_lower = self.lower * x.lower
+            return Fract(new_upper, new_lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper - x * self.lower, self.lower)
+        else:
+            raise TypeError("Ошибка вычитания из дроби!")
+
 def parse_matrix(matrix_str):
     rows = matrix_str.strip().split('\n')
     left_matrix = []  
