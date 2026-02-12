@@ -92,6 +92,14 @@ def print_matrix(left_matrix, right_vector):
         row_str += f"| {str(right_vector[i])}"
         print(row_str)
 
+
+
+def Jordan_Gauss(left, right):
+    working = True
+    while(working):
+        print()
+
+
 if __name__ == "__main__":
     path = ".\Лабы\Лаба2\matrix"
     print(80 * "-")
@@ -106,7 +114,6 @@ if __name__ == "__main__":
     s_matrix = f_matrix.read()
     f_matrix.close()
 
-    
     m_left, m_right = parse_matrix(s_matrix)
     
     print("Исходная матрица:")
