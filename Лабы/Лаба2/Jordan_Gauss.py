@@ -106,15 +106,21 @@ if __name__ == "__main__":
     print( (20 * " ") + "Лабораторная работа №2" + (20 * " "))
     print( (20 * " ") + "МЕТОД ЖОРДАНА-ГАУССА" + (20 * " "))
     print(80 * "-")
-    print("\nInput filename of matrix: ")
-    name = input()
-    if not name.__contains__(".txt"):
-        name = name + ".txt"
-    f_matrix = open(f'{path}\{name}', "r")
-    s_matrix = f_matrix.read()
-    f_matrix.close()
-
-    m_left, m_right = parse_matrix(s_matrix)
+    while(1):
+        print("\nInput filename of matrix (or exit to shutdown the program): ")
+        name = input()
     
-    print("Исходная матрица:")
-    print_matrix(m_left, m_right)
+        if (name == "exit"):
+            print("Shutting Down")
+            break
+    
+        if not name.__contains__(".txt"):
+            name = name + ".txt"
+        f_matrix = open(f'{path}\{name}', "r")
+        s_matrix = f_matrix.read()
+        f_matrix.close()
+
+        m_left, m_right = parse_matrix(s_matrix)
+    
+        print("Исходная матрица:")
+        print_matrix(m_left, m_right)
