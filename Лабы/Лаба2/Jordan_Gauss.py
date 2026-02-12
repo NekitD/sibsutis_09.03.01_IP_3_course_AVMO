@@ -89,7 +89,7 @@ def print_matrix(left_matrix, right_vector):
         row_str = ""
         for j in range(len(left_matrix[i])):
             row_str += f"{str(left_matrix[i][j]):>8} "
-        row_str += f"| {str(right_vector[i])}"
+        row_str += f"| {str(right_vector[i]):>8}"
         print(row_str)
 
 
