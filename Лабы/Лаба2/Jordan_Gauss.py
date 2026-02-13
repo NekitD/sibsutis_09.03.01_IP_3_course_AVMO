@@ -159,8 +159,15 @@ def Jordan_Gauss(left, right):
         print(f'Главный элемент ({main_row},{col}): {main}')
 
         if(main == 0):
-            print(f'Столбец {col} не входит в базис.')
-            j_case = 1
+            zeros = True
+            for c in range(m):
+                if left[main_row][c] != 0:
+                    zeros = False
+            if(zeros and right[main_row] != 0):
+                j_case = 3
+            else:
+                print(f'Столбец {col} не входит в базис.')
+                j_case = 1
             continue
 
         for j in range(col, m):
@@ -179,17 +186,16 @@ def Jordan_Gauss(left, right):
         print(f'Зануляем элементы над и под 1 в столбце {col}:')
         print_matrix(left, right)
 
-        for r in range(n):
-            zeros = True
-            for c in range(m):
-                if left[r][c] != 0:
-                    zeros = False
-            if(zeros and right[r] != 0):
-                j_case = 3
+        # for r in range(n):
+        #     zeros = True
+        #     for c in range(m):
+        #         if left[r][c] != 0:
+        #             zeros = False
+        #     if(zeros and right[r] != 0):
+        #         j_case = 3
 
         print()
         cur_row += 1
-
 
     if(j_case == 0):
         print("Система имеет единственное решение:")
@@ -201,30 +207,40 @@ def Jordan_Gauss(left, right):
         row = 0
         col = 0
         while(col < m and row < n):
+            o_zeros = True 
+            for z in range(m):
+                if left[row][z] != 0:
+                    o_zeros = False
+            if(o_zeros and right[row] == 0):
+                row += 1
+                continue
+
             dec = f'x{col+1} = '
-            if right[row] != 0:
+            if (right[row] != 0):
                 dec += str(right[row])
-                sign = True
             else:
                 dec += '0'
-                sign = True
                 
             for s in range(m):
-                if s != col and left[row][s] != 0:
+                if s != col:
                     k = left[row][s] * (-1)
                     if k > 0:
-                        if sign:
-                            dec += f' + {k}*x{s+1}'
+                        if abs(k) == 1:
+                            dec += f' + x{s+1}'
                         else:
-                            dec += f'{k}*x{s+1}'
-                            sign = True
+                            dec += f' + {k}*x{s+1}'
+                    elif k < 0:
+                        if abs(k) == 1:
+                            dec += f' - x{s+1}'
+                        else:
+                            dec += f' - {abs(k)}*x{s+1}'
                     else:
-                        dec += f' - {abs(k)}*x{s+1}'
-                        sign = True
+                       dec += f' + 0'  
             print(dec)
             col += 1
             row += 1
     else:
+        print("\nНулевая левая часть при ненулевой правой!")
         print("Система не имеет решений!")
 
 if __name__ == "__main__":
