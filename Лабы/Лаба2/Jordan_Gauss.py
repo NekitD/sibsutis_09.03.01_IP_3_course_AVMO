@@ -209,9 +209,9 @@ def Jordan_Gauss(left, right):
             for s in range(m):
                 if(s != col and left[row][s] != 0):
                     if(sign):
-                        dec += f' + ({left[row][s] * (-1)})'
+                        dec += f' + ({left[row][s] * (-1)} * x{s + 1})'
                     else:
-                        dec += f'({left[row][s] * (-1)})'
+                        dec += f'({left[row][s] * (-1)} * x{s + 1})'
             print(dec)
     else:
         print("Система не имеет решений!")
