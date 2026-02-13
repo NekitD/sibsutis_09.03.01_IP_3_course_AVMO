@@ -138,24 +138,31 @@ def Jordan_Gauss(left, right):
     n = len(left)
     m = len(left[0])
 
-    option = 0
+    cur_row = 0
+    j_case = 0
     
     for col in range(min(n, m)):
         print('-' * 50)
         print(f'ШАГ {col + 1}:')
-        main_row = col
+        main_row = cur_row
         for i in range(col, n):
             if abs(left[i][col]) > abs(left[main_row][col]):
                 main_row = i
         
-        if main_row != col:
+        if main_row != cur_row:
             left[col], left[main_row] = left[main_row], left[col]
             right[col], right[main_row] = right[main_row], right[col]
             print(f'Меняем строки {main_row} и {col} местами:')
             print_matrix(left, right)
         
-        main = left[col][col]
-        print(f'Главный элемент ({col},{col}): {main}')
+        main = left[main_row][col]
+        print(f'Главный элемент ({main_row},{col}): {main}')
+
+        if(main == 0):
+            print(f'Столбец {col} не входит в базис.')
+            j_case = 1
+            continue
+
         for j in range(col, m):
             left[col][j] = left[col][j] / main
         right[col] = right[col] / main
@@ -171,12 +178,24 @@ def Jordan_Gauss(left, right):
                     right[i] = right[i] - (right[col] * d)
         print(f'Зануляем элементы над и под 1 в столбце {col}:')
         print_matrix(left, right)
+
+        for r in n:
+            zeros = True
+            for c in m:
+                if left[r][c] != 0:
+                    zeros = False
+                if(zeros and right[r] != 0):
+                    j_case = 3
+
         print()
-    if(option == 0):
+        cur_row += 1
+
+
+    if(j_case == 0):
         print("Система имеет единственное решение:")
         for i in range(len(left)):
             print(f'x{i+1} = {right[i]}')
-    elif (option == 1):
+    elif (j_case == 1):
         print("Система имеет бесконечное множество решений.")
         print("Общий вид:")
         row = 0
@@ -184,11 +203,11 @@ def Jordan_Gauss(left, right):
         for col, row in range(m):
             dec = f'x{i+1} = '
             sign = False
-            if(right[row] != Fract(0, 1)):
+            if(right[row] != 0):
                 dec += f'({right[row]})'
                 sign = True
             for s in range(m):
-                if(s != col and left[row][s] != Fract(0, 1)):
+                if(s != col and left[row][s] != 0):
                     if(sign):
                         dec += f' + ({left[row][s] * (-1)})'
                     else:
