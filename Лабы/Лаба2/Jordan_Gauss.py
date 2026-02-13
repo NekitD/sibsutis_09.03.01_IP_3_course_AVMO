@@ -179,9 +179,9 @@ def Jordan_Gauss(left, right):
         print(f'Зануляем элементы над и под 1 в столбце {col}:')
         print_matrix(left, right)
 
-        for r in n:
+        for r in range(n):
             zeros = True
-            for c in m:
+            for c in range(m):
                 if left[r][c] != 0:
                     zeros = False
                 if(zeros and right[r] != 0):
