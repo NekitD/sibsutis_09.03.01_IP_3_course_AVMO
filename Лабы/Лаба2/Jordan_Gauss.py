@@ -94,10 +94,65 @@ def print_matrix(left_matrix, right_vector):
 
 
 
+def exchange_rows(row1, row2, right1, right2):
+    for i in range(len(row1)):
+        temp = row1[i]
+        row1[i] = row2[i]
+        row2[i] = temp
+    temp = right1
+    right1 = right2
+    right2 = temp
+
+
+def add_row(row1, row2):
+    new_row = []
+    if len(row1) != len(row2):
+        raise IndexError("Невозможно провести сложение: ряды разной длины!")
+    for i in range(len(row1)):
+        new_row = row1[i] + row2[i]
+    return new_row
+
+def sub_row(row1, row2):
+    new_row = []
+    if len(row1) != len(row2):
+        raise IndexError("Невозможно провести вычитание: ряды разной длины!")
+    for i in range(len(row1)):
+        new_row = row1[i] - row2[i]
+    return new_row
+
+def mul_row(row, x):
+    new_row = []
+    for i in range(len(row)):
+        new_row = row[i] * x
+    return new_row
+
+def div_row(row, x):
+    new_row = []
+    for i in range(len(row)):
+        new_row = row[i] / x
+    return new_row
+
 def Jordan_Gauss(left, right):
-    working = True
-    while(working):
-        print()
+    col = 0
+    row = 0
+    main = 0
+    step = 0
+    for a in range(len(left[0])):
+        for i in range(row, len(left)):
+            step += 1
+            print(f'ШАГ {step}:')
+            if(left[i][col] > left[row][col]):
+                exchange_rows(left[i], left[row], right[i], right[row])
+        main = left[row][col]
+        for j in range(len(left[0])):
+            left[row][j] /= main
+        for r in range(len(left)):
+            if(r != row and left[r][col] != Fract(0, 1)):
+                left[r] = sub_row(left[r], mul_row(left[row], ((left[r][col])/(left[row][col]))))
+        print_matrix(left, right)
+        col += 1
+                
+                    
 
 
 if __name__ == "__main__":
