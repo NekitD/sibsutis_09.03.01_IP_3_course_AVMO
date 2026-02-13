@@ -170,30 +170,43 @@ def Jordan_Gauss(left, right):
                 j_case = 1
             continue
 
-        for j in range(col, m):
-            left[main_row][j] = left[main_row][j] / main
-        right[main_row] = right[main_row] / main
-        print(f'Делим {main_row} строку на {main}:')
-        print_matrix(left, right)
+        #for j in range(col, m):
+        #    left[main_row][j] = left[main_row][j] / main
+        #right[main_row] = right[main_row] / main
+        #print(f'Делим {main_row} строку на {main}:')
+        #print_matrix(left, right)
+        
+        # Зануление через множитель
+        # for i in range(n):
+        #     if i != main_row:
+        #         d = left[i][col]
+        #         if d.upper != 0:
+        #             for j in range(main_row, m):
+        #                 left[i][j] = left[i][j] - (left[main_row][j] * d)
+        #             right[i] = right[i] - (right[main_row] * d)
+        # print(f'Зануляем элементы над и под 1 в столбце {col}:')
+        
+        # Метод прямоугольников
+        old_left = [[left[i][j] for j in range(m)] for i in range(n)]
+        old_right = right[:]
         
         for i in range(n):
-            if i != main_row:
-                d = left[i][col]
-                if d.upper != 0:
-                    for j in range(main_row, m):
-                        left[i][j] = left[i][j] - (left[main_row][j] * d)
-                    right[i] = right[i] - (right[main_row] * d)
-        print(f'Зануляем элементы над и под 1 в столбце {col}:')
+            if i != main_row: 
+                for j in range(m):
+                    if j != col: 
+                        left[i][j] = old_left[i][j] - (old_left[i][col] * old_left[main_row][j]) / main
+        
+                right[i] = old_right[i] - (old_left[i][col] * old_right[main_row]) / main
+                left[i][col] = Fract(0, 1)
+        
+        for j in range(m):
+            if j != col:
+                left[main_row][j] = old_left[main_row][j] / main
+        left[main_row][col] = Fract(1, 1) 
+        right[main_row] = old_right[main_row] / main
+        print(f'Делим {main_row} строку на макс. по модулю в столбце {col}: {main}:')
+        print('Пересчитываем элементы:')
         print_matrix(left, right)
-
-        # for r in range(n):
-        #     zeros = True
-        #     for c in range(m):
-        #         if left[r][c] != 0:
-        #             zeros = False
-        #     if(zeros and right[r] != 0):
-        #         j_case = 3
-
         print()
         cur_row += 1
 
