@@ -138,7 +138,7 @@ def Jordan_Gauss(left, right):
     n = len(left)
     m = len(left[0])
 
-    options = 0
+    option = 0
     
     for col in range(min(n, m)):
         print('-' * 50)
@@ -172,10 +172,30 @@ def Jordan_Gauss(left, right):
         print(f'Зануляем элементы над и под 1 в столбце {col}:')
         print_matrix(left, right)
         print()
-    if(options == 0):
+    if(option == 0):
         print("Система имеет единственное решение:")
         for i in range(len(left)):
             print(f'x{i+1} = {right[i]}')
+    elif (option == 1):
+        print("Система имеет бесконечное множество решений.")
+        print("Общий вид:")
+        row = 0
+        col = 0
+        for col, row in range(m):
+            dec = f'x{i+1} = '
+            sign = False
+            if(right[row] != Fract(0, 1)):
+                dec += f'({right[row]})'
+                sign = True
+            for s in range(m):
+                if(s != col and left[row][s] != Fract(0, 1)):
+                    if(sign):
+                        dec += f' + ({left[row][s] * (-1)})'
+                    else:
+                        dec += f'({left[row][s] * (-1)})'
+            print(dec)
+    else:
+        print("Система не имеет решений!")
 
 if __name__ == "__main__":
     path = ".\Лабы\Лаба2\matrix"
