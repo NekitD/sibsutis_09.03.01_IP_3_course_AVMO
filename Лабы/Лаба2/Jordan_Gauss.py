@@ -57,6 +57,47 @@ class Fract:
             return Fract(self.upper - x * self.lower, self.lower)
         else:
             raise TypeError("Ошибка вычитания из дроби!")
+    
+    def __eq__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower == x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper == x * self.lower
+        return False
+
+    def __ne__(self, x):
+        return not self.__eq__(x)
+
+    def __gt__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower > x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper > x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __ge__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower >= x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper >= x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __lt__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower < x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper < x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __le__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower <= x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper <= x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __abs__(self):
+        return Fract(abs(self.upper), self.lower)
 
 def parse_matrix(matrix_str):
     rows = matrix_str.strip().split('\n')
@@ -93,67 +134,48 @@ def print_matrix(left_matrix, right_vector):
         print(row_str)
 
 
-
-def exchange_rows(row1, row2, right1, right2):
-    for i in range(len(row1)):
-        temp = row1[i]
-        row1[i] = row2[i]
-        row2[i] = temp
-    temp = right1
-    right1 = right2
-    right2 = temp
-
-
-def add_row(row1, row2):
-    new_row = []
-    if len(row1) != len(row2):
-        raise IndexError("Невозможно провести сложение: ряды разной длины!")
-    for i in range(len(row1)):
-        new_row = row1[i] + row2[i]
-    return new_row
-
-def sub_row(row1, row2):
-    new_row = []
-    if len(row1) != len(row2):
-        raise IndexError("Невозможно провести вычитание: ряды разной длины!")
-    for i in range(len(row1)):
-        new_row = row1[i] - row2[i]
-    return new_row
-
-def mul_row(row, x):
-    new_row = []
-    for i in range(len(row)):
-        new_row = row[i] * x
-    return new_row
-
-def div_row(row, x):
-    new_row = []
-    for i in range(len(row)):
-        new_row = row[i] / x
-    return new_row
-
 def Jordan_Gauss(left, right):
-    col = 0
-    row = 0
-    main = 0
-    step = 0
-    for a in range(len(left[0])):
-        for i in range(row, len(left)):
-            step += 1
-            print(f'ШАГ {step}:')
-            if(left[i][col] > left[row][col]):
-                exchange_rows(left[i], left[row], right[i], right[row])
-        main = left[row][col]
-        for j in range(len(left[0])):
-            left[row][j] /= main
-        for r in range(len(left)):
-            if(r != row and left[r][col] != Fract(0, 1)):
-                left[r] = sub_row(left[r], mul_row(left[row], ((left[r][col])/(left[row][col]))))
-        print_matrix(left, right)
-        col += 1
-                
-                    
+    n = len(left)
+    m = len(left[0])
 
+    options = 0
+    
+    for col in range(min(n, m)):
+        print('-' * 50)
+        print(f'ШАГ {col + 1}:')
+        main_row = col
+        for i in range(col, n):
+            if abs(left[i][col]) > abs(left[main_row][col]):
+                main_row = i
+        
+        if main_row != col:
+            left[col], left[main_row] = left[main_row], left[col]
+            right[col], right[main_row] = right[main_row], right[col]
+            print(f'Меняем строки {main_row} и {col} местами:')
+            print_matrix(left, right)
+        
+        main = left[col][col]
+        print(f'Главный элемент ({col},{col}): {main}')
+        for j in range(col, m):
+            left[col][j] = left[col][j] / main
+        right[col] = right[col] / main
+        print(f'Делим {main_row} строку на {main}:')
+        print_matrix(left, right)
+        
+        for i in range(n):
+            if i != col:
+                d = left[i][col]
+                if d.upper != 0:
+                    for j in range(col, m):
+                        left[i][j] = left[i][j] - (left[col][j] * d)
+                    right[i] = right[i] - (right[col] * d)
+        print(f'Зануляем элементы над и под 1 в столбце {col}:')
+        print_matrix(left, right)
+        print()
+    if(options == 0):
+        print("Система имеет единственное решение:")
+        for i in range(len(left)):
+            print(f'x{i+1} = {right[i]}')
 
 if __name__ == "__main__":
     path = ".\Лабы\Лаба2\matrix"
@@ -179,3 +201,5 @@ if __name__ == "__main__":
     
         print("Исходная матрица:")
         print_matrix(m_left, m_right)
+
+        Jordan_Gauss(m_left, m_right)
