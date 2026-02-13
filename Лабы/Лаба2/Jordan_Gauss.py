@@ -198,48 +198,58 @@ def Jordan_Gauss(left, right):
         cur_row += 1
 
     if(j_case == 0):
+        print()
         print("Система имеет единственное решение:")
         for i in range(len(left)):
             print(f'x{i+1} = {right[i]}')
     elif (j_case == 1):
+        print()
         print("Система имеет бесконечное множество решений.")
         print("Общий вид:")
         row = 0
         col = 0
         while(col < m and row < n):
+            
             o_zeros = True 
             for z in range(m):
                 if left[row][z] != 0:
                     o_zeros = False
+
             if(o_zeros and right[row] == 0):
                 row += 1
+                col += 1
                 continue
 
-            dec = f'x{col+1} = '
+            if(left[row][col] == 0):
+                col += 1
+                continue
+
+            sol = f'x{col+1} = '
             if (right[row] != 0):
-                dec += str(right[row])
+                sol += str(right[row])
             else:
-                dec += '0'
+                sol += '0'
                 
             for s in range(m):
                 if s != col:
                     k = left[row][s] * (-1)
                     if k > 0:
                         if abs(k) == 1:
-                            dec += f' + x{s+1}'
+                            sol += f' + x{s+1}'
                         else:
-                            dec += f' + {k}*x{s+1}'
+                            sol += f' + {k}*x{s+1}'
                     elif k < 0:
                         if abs(k) == 1:
-                            dec += f' - x{s+1}'
+                            sol += f' - x{s+1}'
                         else:
-                            dec += f' - {abs(k)}*x{s+1}'
+                            sol += f' - {abs(k)}*x{s+1}'
                     else:
-                       dec += f' + 0'  
-            print(dec)
+                       sol += f' + 0'  
+            print(sol)
             col += 1
             row += 1
     else:
+        print()
         print("\nНулевая левая часть при ненулевой правой!")
         print("Система не имеет решений!")
 
