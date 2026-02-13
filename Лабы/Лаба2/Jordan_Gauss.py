@@ -150,11 +150,11 @@ def Jordan_Gauss(left, right):
                 main_row = i
         
         if main_row != cur_row:
-            left[col], left[main_row] = left[main_row], left[col]
-            right[col], right[main_row] = right[main_row], right[col]
-            print(f'Меняем строки {main_row} и {col} местами:')
+            left[cur_row], left[main_row] = left[main_row], left[cur_row]
+            right[cur_row], right[main_row] = right[main_row], right[cur_row]
+            print(f'Меняем строки {main_row} и {cur_row} местами:')
             print_matrix(left, right)
-        
+        main_row = cur_row
         main = left[main_row][col]
         print(f'Главный элемент ({main_row},{col}): {main}')
 
@@ -164,18 +164,18 @@ def Jordan_Gauss(left, right):
             continue
 
         for j in range(col, m):
-            left[col][j] = left[col][j] / main
-        right[col] = right[col] / main
+            left[main_row][j] = left[main_row][j] / main
+        right[main_row] = right[main_row] / main
         print(f'Делим {main_row} строку на {main}:')
         print_matrix(left, right)
         
         for i in range(n):
-            if i != col:
+            if i != main_row:
                 d = left[i][col]
                 if d.upper != 0:
-                    for j in range(col, m):
-                        left[i][j] = left[i][j] - (left[col][j] * d)
-                    right[i] = right[i] - (right[col] * d)
+                    for j in range(main_row, m):
+                        left[i][j] = left[i][j] - (left[main_row][j] * d)
+                    right[i] = right[i] - (right[main_row] * d)
         print(f'Зануляем элементы над и под 1 в столбце {col}:')
         print_matrix(left, right)
 
@@ -184,8 +184,8 @@ def Jordan_Gauss(left, right):
             for c in range(m):
                 if left[r][c] != 0:
                     zeros = False
-                if(zeros and right[r] != 0):
-                    j_case = 3
+            if(zeros and right[r] != 0):
+                j_case = 3
 
         print()
         cur_row += 1
@@ -200,19 +200,30 @@ def Jordan_Gauss(left, right):
         print("Общий вид:")
         row = 0
         col = 0
-        for col, row in range(m):
-            dec = f'x{i+1} = '
-            sign = False
-            if(right[row] != 0):
-                dec += f'({right[row]})'
+        while(col < m and row < n):
+            dec = f'x{col+1} = '
+            if right[row] != 0:
+                dec += str(right[row])
                 sign = True
+            else:
+                dec += '0'
+                sign = True
+                
             for s in range(m):
-                if(s != col and left[row][s] != 0):
-                    if(sign):
-                        dec += f' + ({left[row][s] * (-1)} * x{s + 1})'
+                if s != col and left[row][s] != 0:
+                    k = left[row][s] * (-1)
+                    if k > 0:
+                        if sign:
+                            dec += f' + {k}*x{s+1}'
+                        else:
+                            dec += f'{k}*x{s+1}'
+                            sign = True
                     else:
-                        dec += f'({left[row][s] * (-1)} * x{s + 1})'
+                        dec += f' - {abs(k)}*x{s+1}'
+                        sign = True
             print(dec)
+            col += 1
+            row += 1
     else:
         print("Система не имеет решений!")
 
