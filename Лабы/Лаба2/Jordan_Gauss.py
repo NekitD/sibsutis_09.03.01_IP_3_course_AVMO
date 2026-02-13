@@ -223,11 +223,11 @@ if __name__ == "__main__":
     print( (20 * " ") + "МЕТОД ЖОРДАНА-ГАУССА" + (20 * " "))
     print(80 * "-")
     while(1):
-        print("\nInput filename of matrix (or exit to shutdown the program): ")
+        print("\nВведите имя файла с матрицей (или exit, чтобы выйти): ")
         name = input()
     
         if (name == "exit"):
-            print("Shutting Down")
+            print("Завершение работы...")
             break
     
         if not name.__contains__(".txt"):
