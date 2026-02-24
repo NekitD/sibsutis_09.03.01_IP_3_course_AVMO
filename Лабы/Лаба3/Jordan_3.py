@@ -1,0 +1,475 @@
+import math
+from itertools import combinations
+
+class Fract:
+    def __init__(self, upper, lower=1):
+        if lower == 0:
+            raise ValueError("Знаменатель не может быть 0!")
+        if lower < 0:
+            upper = -upper
+            lower = -lower
+        self.upper = upper
+        self.lower = lower
+        self.reduce()
+
+    def __str__(self):
+        if self.upper % self.lower == 0:
+            return str(self.upper // self.lower)
+        else:
+            return f'({self.upper}/{self.lower})'
+
+    def reduce(self):
+        gcd = math.gcd(self.upper, self.lower)
+        self.upper //= gcd
+        self.lower //= gcd
+
+    def __mul__(self, x):
+        if isinstance(x, Fract):
+            return Fract(self.upper * x.upper, self.lower * x.lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper * x, self.lower)
+        else:
+            raise TypeError("Ошибка умножения дроби!")
+
+    def __truediv__(self, x):
+        if isinstance(x, Fract):
+            return Fract(self.upper * x.lower, self.lower * x.upper)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper, self.lower * x)
+        else:
+            raise TypeError("Ошибка деления дроби!")
+
+    def __add__(self, x):
+        if isinstance(x, Fract):
+            new_upper = self.upper * x.lower + x.upper * self.lower
+            new_lower = self.lower * x.lower
+            return Fract(new_upper, new_lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper + x * self.lower, self.lower)
+        else:
+            raise TypeError("Ошибка сложения дробей!")
+
+    def __sub__(self, x):
+        if isinstance(x, Fract):
+            new_upper = self.upper * x.lower - x.upper * self.lower
+            new_lower = self.lower * x.lower
+            return Fract(new_upper, new_lower)
+        elif isinstance(x, (int, float)):
+            return Fract(self.upper - x * self.lower, self.lower)
+        else:
+            raise TypeError("Ошибка вычитания из дроби!")
+    
+    def __eq__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower == x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper == x * self.lower
+        return False
+
+    def __ne__(self, x):
+        return not self.__eq__(x)
+
+    def __gt__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower > x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper > x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __ge__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower >= x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper >= x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __lt__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower < x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper < x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __le__(self, x):
+        if isinstance(x, Fract):
+            return self.upper * x.lower <= x.upper * self.lower
+        elif isinstance(x, (int, float)):
+            return self.upper <= x * self.lower
+        raise TypeError("Ошибка сравнения!")
+
+    def __abs__(self):
+        return Fract(abs(self.upper), self.lower)
+
+def parse_matrix(matrix_str):
+    rows = matrix_str.strip().split('\n')
+    left_matrix = []  
+    right_vector = []   
+    for row in rows:
+        left, right = row.strip().split('|')
+        left_parts = left.strip().split()
+        left_part = []
+        for num in left_parts:
+            if '/' in num:
+                up, low = map(int, num.split('/'))
+                left_part.append(Fract(up, low))
+            else:
+                left_part.append(Fract(int(num)))
+        right_str = right.strip()
+        if '/' in right_str:
+            up, low = map(int, right_str.split('/'))
+            right_part = Fract(up, low)
+        else:
+            right_part = Fract(int(right_str))
+        
+        left_matrix.append(left_part)
+        right_vector.append(right_part)
+    
+    return left_matrix, right_vector
+
+def print_matrix(left_matrix, right_vector):
+    for i in range(len(left_matrix)):
+        row_str = ""
+        for j in range(len(left_matrix[i])):
+            row_str += f"{str(left_matrix[i][j]):>8} "
+        row_str += f"| {str(right_vector[i]):>8}"
+        print(row_str)
+
+
+def format_to_list(indices):
+    result = ""
+    for idx in sorted(indices):
+        result += f'x{idx+1}'
+    return result
+
+def solve_basis_system(left, right, basis_cols):
+
+    n = len(left)           # число уравнений
+    n_basis = len(basis_cols) # число базисных переменных
+    
+    
+    aug_left = []
+    aug_right = []
+    
+    #мини-матрицав
+    for i in range(n):
+        row = []
+        for j in basis_cols: #например (0, 1) = x1x2
+            row.append(left[i][j])
+        aug_left.append(row)
+        aug_right.append(right[i])
+    
+    print("Исходная мини-матрица:")
+    print_matrix(aug_left, aug_right)
+    print()
+
+    left_copy = [[aug_left[i][j] for j in range(n_basis)] for i in range(n)]
+    right_copy = aug_right[:]
+    
+    cur_row = 0
+    n_rows = n
+    n_cols = n_basis
+    
+
+    for col in range(min(n_rows, n_cols)):
+        if cur_row >= n_rows:
+            break
+        
+        # Поиск главного элемента
+        main_row = cur_row
+        for i in range(cur_row, n_rows):
+            if abs(left_copy[i][col]) > abs(left_copy[main_row][col]):
+                main_row = i
+        
+        # Если главный элемент нулевой
+        if left_copy[main_row][col] == 0:
+            return None
+        
+
+        if main_row != cur_row:
+            left_copy[cur_row], left_copy[main_row] = left_copy[main_row], left_copy[cur_row]
+            right_copy[cur_row], right_copy[main_row] = right_copy[main_row], right_copy[cur_row]
+        
+        main_row = cur_row
+        main = left_copy[main_row][col]
+        
+
+        old_left = [[left_copy[i][j] for j in range(n_cols)] for i in range(n_rows)]
+        old_right = right_copy[:]
+        
+
+        for j in range(n_cols):
+            if j != col:
+                left_copy[main_row][j] = old_left[main_row][j] / main
+        left_copy[main_row][col] = Fract(1, 1)
+        right_copy[main_row] = old_right[main_row] / main
+        
+
+        for i in range(n_rows):
+            if i != main_row:
+                for j in range(n_cols):
+                    if j != col:
+                        left_copy[i][j] = old_left[i][j] - (old_left[i][col] * old_left[main_row][j]) / main
+
+                right_copy[i] = old_right[i] - (old_left[i][col] * old_right[main_row]) / main
+                left_copy[i][col] = Fract(0, 1)
+        
+
+        cur_row += 1
+    print("Итоговая мини-матрица:")    
+    print_matrix(left_copy, right_copy)
+    print()
+    
+
+    solution = []
+    for _ in range(n_cols):
+        solution.append(Fract(0))
+    
+    for i in range(min(n_rows, n_cols)):
+        if left_copy[i][i] == 1:
+            solution[i] = right_copy[i]
+    
+    return solution
+
+def find_all_basis_solutions(left, right):
+    
+    n = len(left)   # число уравнений
+    m = len(left[0]) # число переменных
+    
+    rank = n
+    
+    print(f"\n{'='*60}")
+    print("ПОИСК ВСЕХ БАЗИСНЫХ РЕШЕНИЙ")
+    print(f"{'='*60}")
+    print("\nИсходная матрица:")
+    print_matrix(left, right)
+    print()
+    print(f"Ранг матрицы: {rank}")
+    print(f"Число переменных: {m}")
+    
+    if rank == 0:
+        print("Бесконечное множ. решений")
+        return []
+    
+
+    max_solut = math.comb(m, rank)
+    print(f"Максимальное число базисных решений: C({m}, {rank}) = {max_solut}")
+    print()
+
+    
+
+    #range(4) = [0,1,2,3]
+    # [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]
+    all_combinations = list(combinations(range(m), rank)) #индексы
+    basis_solutions = []    
+    seen_solutions = []
+    
+    
+    for idx, basis_cols in enumerate(all_combinations, 1):
+
+        var_str = format_to_list(basis_cols)
+        print(f"{idx:2d}. {var_str}: \n", end="")
+    
+        basis_values = solve_basis_system(left, right, basis_cols)
+        
+        if basis_values is None:
+            print("Нет решения")
+            continue
+        
+
+        # значение решения: (0 0 0 0)
+        full_solution = []
+        for i in range(m):
+            full_solution.append(Fract(0))
+        #заполняем
+        for i, val in enumerate(basis_values):
+            full_solution[basis_cols[i]] = val
+        
+        
+        # Сравниваем с уже найденными решениями
+        is_duplicate = False
+        for seen_sol in seen_solutions:
+            if all(full_solution[j] == seen_sol[j] for j in range(m)):
+                is_duplicate = True
+                break
+        
+        if is_duplicate:
+            print("Нет рещения (дубликат)")
+            continue
+        
+        seen_solutions.append(full_solution)
+        basis_solutions.append((full_solution, basis_cols))
+        
+        #вывод
+        sol_parts = [str(val) for val in full_solution]
+        sol_str = "(" + " ".join(sol_parts) + ")"
+        print(f"{sol_str}")
+        print("\n\n")
+    
+    return basis_solutions
+
+
+def Jordan_Gauss(left, right):
+    n = len(left)
+    m = len(left[0])
+    
+    cur_row = 0
+    j_case = 0
+    
+    for col in range(min(n, m)):
+        print('-' * 50)
+        print(f'ШАГ {col + 1}:')
+        
+        main_row = cur_row
+        for i in range(col, n):
+            if abs(left[i][col]) > abs(left[main_row][col]):
+                main_row = i
+        
+        if main_row != cur_row:
+            left[cur_row], left[main_row] = left[main_row], left[cur_row]
+            right[cur_row], right[main_row] = right[main_row], right[cur_row]
+            print(f'Меняем строки {main_row} и {cur_row} местами:')
+            print_matrix(left, right)
+        
+        main_row = cur_row
+        main = left[main_row][col]
+        print(f'Главный элемент ({main_row},{col}): {main}')
+        
+        if main == 0:
+            zeros = True
+            for c in range(m):
+                if left[main_row][c] != 0:
+                    zeros = False
+            if zeros and right[main_row] != 0:
+                j_case = 3
+            else:
+                print(f'Столбец {col} не входит в базис.')
+                j_case = 1
+            continue
+        
+
+        old_left = [[left[i][j] for j in range(m)] for i in range(n)]
+        old_right = right[:]
+        
+        for j in range(m):
+            if j != col:
+                left[main_row][j] = old_left[main_row][j] / main
+        left[main_row][col] = Fract(1, 1)
+        right[main_row] = old_right[main_row] / main
+        print(f'Делим {main_row} строку на макс. по модулю в столбце {col}: {main}:')
+        print_matrix(left, right)
+        print()
+        
+        for i in range(n):
+            if i != main_row:  
+                for j in range(m):
+                    if j != col: 
+                        left[i][j] = old_left[i][j] - (old_left[i][col] * old_left[main_row][j]) / main
+                right[i] = old_right[i] - (old_left[i][col] * old_right[main_row]) / main
+                
+                left[i][col] = Fract(0, 1)
+        
+
+        print('Пересчитываем элементы:')
+        
+        print_matrix(left, right)
+        print()
+        
+        cur_row += 1
+    
+    if(j_case == 0):
+        print("Система имеет единственное решение:")
+        for i in range(len(left)):
+            print(f'x{i+1} = {right[i]}')
+    elif (j_case == 1):
+        print("Система имеет бесконечное множество решений.")
+        print("Общий вид:")
+        row = 0
+        col = 0
+        while(col < m and row < n):
+            o_zeros = True 
+            for z in range(m):
+                if left[row][z] != 0:
+                    o_zeros = False
+            if(o_zeros and right[row] == 0):
+                row += 1
+                continue
+
+            dec = f'x{col+1} = '
+            if (right[row] != 0):
+                dec += str(right[row])
+            else:
+                dec += '0'
+                
+            for s in range(m):
+                if s != col:
+                    k = left[row][s] * (-1)
+                    if k > 0:
+                        if abs(k) == 1:
+                            dec += f' + x{s+1}'
+                        else:
+                            dec += f' + {k}*x{s+1}'
+                    elif k < 0:
+                        if abs(k) == 1:
+                            dec += f' - x{s+1}'
+                        else:
+                            dec += f' - {abs(k)}*x{s+1}'
+                    else:
+                       dec += f' + 0'  
+            print(dec)
+            col += 1
+            row += 1
+    else:
+        print("\nНулевая левая часть при ненулевой правой!")
+        print("Система не имеет решений!")
+
+if __name__ == "__main__":
+    path = ".\matrix"
+    print(80 * "-")
+    print( (20 * " ") + "Лабораторная работа №2" + (20 * " "))
+    print( (20 * " ") + "МЕТОД ЖОРДАНА-ГАУССА" + (20 * " "))
+    print(80 * "-")
+    while(1):
+        print("\nВведите имя файла с матрицей (или exit, чтобы выйти): ")
+        name = input()
+    
+        if (name == "exit"):
+            print("Завершение работы...")
+            break
+    
+        if not name.__contains__(".txt"):
+            name = name + ".txt"
+        f_matrix = open(f'{path}\{name}', "r")
+        s_matrix = f_matrix.read()
+        f_matrix.close()
+
+        m_left, m_right = parse_matrix(s_matrix)
+    
+        print("\nИсходная матрица:")
+        print_matrix(m_left, m_right)
+        print()
+
+
+        left_copy = [[m_left[i][j] for j in range(len(m_left[0]))] for i in range(len(m_left))]
+        right_copy = m_right[:]
+        
+
+        Jordan_Gauss(left_copy, right_copy)
+        
+        cleaned_left = []
+        cleaned_right = []
+        system_valid = True
+
+        for i in range(len(left_copy)):
+            if all(left_copy[i][j] == 0 for j in range(len(left_copy[0]))):
+                if right_copy[i] != 0:
+                    print("\nСистема несовместна! Решений нет.") # 0 0 0 0 | 3
+                    system_valid = False
+                    break
+            else:
+                cleaned_left.append(left_copy[i]) # 0 0 0 0 | 0
+                cleaned_right.append(right_copy[i])
+
+
+        if system_valid:
+            basis_solutions = find_all_basis_solutions(cleaned_left, cleaned_right)
+        
