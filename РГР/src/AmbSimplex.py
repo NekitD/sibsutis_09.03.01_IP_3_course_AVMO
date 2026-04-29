@@ -5,8 +5,11 @@ from MatrixFunctions import parse_matrix
 
 
 class Method:
-    def __init__(self):
-        print("")
+    def __init__(self, matrix, b_vector, z_vector, target):
+        self.matrix = matrix
+        self.b_vector = b_vector 
+        self.z_vector = z_vector
+        self.target = target
 
     def print_table(self):
         print("")
@@ -15,7 +18,7 @@ class Method:
         return ""
 
 if __name__ == "__main__":
-    path = ".\matrix"
+    path = ".\examples"
     print(80 * "-")
     print( (20 * " ") + "РГР" + (20 * " "))
     print( (10 * " ") + "Решение ЗЛП двойственным симплекс-методом" + (20 * " "))
@@ -34,8 +37,8 @@ if __name__ == "__main__":
         s_matrix = f_matrix.read()
         f_matrix.close()
 
-        matrix, b_vector, target = parse_matrix(s_matrix)
-        solution = Method(matrix, b_vector, target)
+        matrix, b_vector, z_vector, target = parse_matrix(s_matrix)
+        solution = Method(matrix, b_vector, z_vector, target)
         print(solution)
 
         
