@@ -10,6 +10,7 @@ class Method:
         self.b_vector = b_vector 
         self.z_vector = z_vector
         self.target = target
+        self.co = []
 
     def print_table(self):
         print("")
