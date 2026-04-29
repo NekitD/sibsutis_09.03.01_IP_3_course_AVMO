@@ -1,14 +1,18 @@
 import math
 from itertools import combinations
 from Fract import Fract
-from MatrixFunctions import parse_matrix, print_matrix
+from MatrixFunctions import parse_matrix
 
 
 class Method:
     def __init__(self):
         print("")
 
+    def print_table(self):
+        print("")
 
+    def __str__(self):
+        return ""
 
 if __name__ == "__main__":
     path = ".\matrix"
@@ -30,15 +34,10 @@ if __name__ == "__main__":
         s_matrix = f_matrix.read()
         f_matrix.close()
 
-        m_left, m_right = parse_matrix(s_matrix)
-    
-        print("\nИсходная матрица:")
-        print_matrix(m_left, m_right)
-        print()
+        matrix, b_vector, target = parse_matrix(s_matrix)
+        solution = Method(matrix, b_vector, target)
+        print(solution)
 
-
-        # left_copy = [[m_left[i][j] for j in range(len(m_left[0]))] for i in range(len(m_left))]
-        # right_copy = m_right[:]
         
 
         
