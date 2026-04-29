@@ -4,19 +4,8 @@ from Fract import Fract
 from MatrixFunctions import parse_matrix
 
 
-class Method:
-    def __init__(self, matrix, b_vector, z_vector, target):
-        self.matrix = matrix
-        self.b_vector = b_vector 
-        self.z_vector = z_vector
-        self.target = target
-        self.co = []
-
-    def print_table(self):
-        print("")
-
-    def __str__(self):
-        return ""
+def AmbivalentSimplex(matrix, b_vector, z_vector, target):
+    print()
 
 if __name__ == "__main__":
     path = ".\examples"
@@ -39,8 +28,7 @@ if __name__ == "__main__":
         f_matrix.close()
 
         matrix, b_vector, z_vector, target = parse_matrix(s_matrix)
-        solution = Method(matrix, b_vector, z_vector, target)
-        print(solution)
+        AmbivalentSimplex(matrix, b_vector, z_vector, target)
 
         
 
