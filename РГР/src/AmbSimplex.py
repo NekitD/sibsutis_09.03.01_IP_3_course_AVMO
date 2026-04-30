@@ -2,6 +2,9 @@ import math
 from itertools import combinations
 from Fract import Fract
 from MatrixFunctions import parse_matrix
+import numpy as np
+import time
+import copy
 
 
 def isBasic(x, y, matrix):
@@ -87,13 +90,54 @@ def compute_co(row, basis, z_vector):
     return co
 
 def find_res_col(co_vector):
-    max = -1
+    min = co_vector[0]
     res = 0
     for i in range(len(co_vector)):
-        if co_vector[i] != "-" and co_vector[i] > max: 
-            max = co_vector[i]
+        if co_vector[i] != "-" and co_vector[i] < min: 
+            min = co_vector[i]
             res = i
     return res
+
+
+def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, basis):
+    matrix = copy.deepcopy(old_matrix)
+    z_vector = []
+    b_vector = []
+    
+    # Делим разрешающую строку на разрешающий элемент
+    divRowVal(matrix[rr], old_matrix[rr][rc])
+   
+    #Обнуляем разрешающий столбец, кроме разршающей строки
+    for r in range(len(old_matrix)):
+        if r != rr:
+            matrix[r][rc] = 0
+
+    # Метод прямоугольников (матрица)
+    for x in range(len(matrix)):
+        for y in range(len(matrix[x])):
+            if y not in basis or x == rr or y == rc: continue
+            matrix[x][y] = old_matrix[x][y] - ((old_matrix[rr][y] * old_matrix[x][rc]) / old_matrix[rr][rc])
+    
+    # Метод прямоугольников (z-строка)
+    for y in range(len(old_z_vector)):
+        z = 0
+        if y != rc:
+            z = old_z_vector[y] - ((old_matrix[rr][y] * old_z_vector[rc]) / old_matrix[rr][rc])
+        z_vector.append(z)
+    
+    # Метод прямоугольников (b-строка)
+    for x in range(len(old_b_vector)):
+        if x == rr: 
+            b = old_b_vector[rr]/old_matrix[rr][rc]
+        else:
+            b = old_b_vector[x] - ((old_b_vector[rr] * old_matrix[x][rc]) / old_matrix[rr][rc])
+        b_vector.append(b)
+
+    # Метод прямоугольников (Ответ)
+    z_answ = old_z_answ - ((old_z_vector[rc] * old_b_vector[rr]) / old_matrix[rr][rc])
+    return matrix, b_vector, z_vector, z_answ, 
+
+
 
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # ШАГ 1: 
@@ -119,16 +163,18 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     
     # ШАГ 3: 
     # Основной цикл поиска решения:
-    while(not noNegative(b_vector)):
+    while(True):
         step+=1
         print("ШАГ " + str(step) + ":")
         resolve_row = find_res_row(b_vector)
         co_vector = compute_co(matrix[resolve_row], basis, z_vector)
         resolve_col = find_res_col(co_vector)
-        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, rr, rc)
+        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col)
+        if(noNegative(b_vector)): break
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
-        print(f'Выводим из базиса x{resolve_row}')
-        print(f'Вводим в базис x{resolve_col}')
+        print(f'Выводим из базиса x{resolve_row + 1}')
+        print(f'Вводим в базис x{resolve_col + 1}')
+        matrix, b_vector, z_vector, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
 
 
 if __name__ == "__main__":
