@@ -5,36 +5,37 @@ from MatrixFunctions import parse_matrix
 
 
 def isBasic(x, y, matrix):
-    for i in range(len(matrix[x])):
-        if ((i != y) and (matrix[x][i]) != 0):
+    for i in range(len(matrix)):
+        if ((i != x) and (matrix[i][y]) != 0):
             return False
     return True
 
-def mulRowVal(row, b, val):
+def mulRowVal(row, val):
     for i in range(len(row)):
-        row[i] *= -1
+        row[i] *= val
 
 def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
     strng = ""
     strng = (" " * 2) + "|" + "   " + "Б.п" + "   " + "|" + "   " + "1" + "   " + "|"
     
     for x in range(len(matrix)):
-        strng += "    " + "x" + str(x) + "    " + "|"
+        strng += "    " + "x" + str(x + 1) + "    " + "|"
     print((" " * 2) + "====" * (len(matrix) + 2))
     print(strng)
     print((" " * 2) + "====" * (len(matrix) + 2))
     
     for y in range(len(basis)):
-        strng = (" " * 2) + "|" + "   " + "x" + str(basis[y]) + "   " + "|" + "   " + str(b_vector[basis[y]]) + "   " + "|"
+        strng = (" " * 2) + "|" + "   " + "x" + str(basis[y] + 1) + "   " + "|" + "   " + str(b_vector[basis[y]]) + "   " + "|"
         for x in range(len(matrix)):
             strng += "    " + str(matrix[x][basis[y]]) + "    " + "|"
         print(strng)
-        print("----" * (len(matrix) + 2))
+        print((" " * 2) + "----" * (len(matrix) + 2))
     
     strng = (" " * 2) + "|" + "   " + "Z" + "   " + "|" + "   " + str(z) + "   " + "|"
     for x in range(len(matrix)):
         strng += "    " + str(z_vector[x]) + "    " + "|"
     print(strng)
+    print((" " * 2) + "----" * (len(matrix) + 2))
 
     strng = (" " * 2) + "|" + "   " + "CO" + "   " + "|" + "   " + "-" + "   " + "|"
     for x in range(len(matrix)):
@@ -52,7 +53,7 @@ def noNegative(vector):
 def find_res_row(b_vector):
     min = 1
     res = 0
-    for i in len(b_vector):
+    for i in range(len(b_vector)):
         if b_vector[i] < min: 
             min = b_vector[i]
             res = i
@@ -78,32 +79,33 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
     # Формируем базис
+    step = 0
     basis = []
     z_answ = 0
     for x in range(len(matrix)):
         for y in range(len(matrix[x])):
             if matrix[x][y] == -1 or matrix[x][y] == 1:
-                if isBasic(x, y, matrix):
-                    basis.append(x)
+                if (isBasic(x, y, matrix)):
+                    basis.append(y)
                     if matrix[x][y] < 0:
-                        mulRowVal(matrix[x])
+                        mulRowVal(matrix[x], -1)
                         b_vector[x] *= -1
-    print("БАЗИС" + str(basis))
+                    break
     # ШАГ 2: 
     # Формируем Z-строку
     z_sign = -1 * target
     for z in z_vector: 
         z *= z_sign
     
-    co_vector = [0, 0, 0, 0, 0, 0] # test
-    printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
     # ШАГ 3: 
     # Основной цикл поиска решения:
     while(not noNegative(b_vector)):
+        step+=1
+        print("ШАГ " + str(step) + ":")
         resolve_row = find_res_row(b_vector)
         co_vector = compute_co(resolve_row, z_vector)
         resolve_col = find_res_col(co_vector)
-       # printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
+        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
         break # test
 
 
