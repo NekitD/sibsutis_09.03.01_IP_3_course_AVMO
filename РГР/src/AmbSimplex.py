@@ -18,30 +18,30 @@ def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
     strng = ""
     strng = (" " * 2) + "|" + "   " + "Б.п" + "   " + "|" + "   " + "1" + "   " + "|"
     
-    for x in range(len(matrix)):
+    for x in range(len(matrix[0])):
         strng += "    " + "x" + str(x + 1) + "    " + "|"
-    print((" " * 2) + "====" * (len(matrix) + 2))
+    print((" " * 2) + "===============" * (len(matrix) + 2))
     print(strng)
-    print((" " * 2) + "====" * (len(matrix) + 2))
+    print((" " * 2) + "===============" * (len(matrix) + 2))
     
-    for y in range(len(basis)):
-        strng = (" " * 2) + "|" + "   " + "x" + str(basis[y] + 1) + "   " + "|" + "   " + str(b_vector[basis[y]]) + "   " + "|"
-        for x in range(len(matrix)):
-            strng += "    " + str(matrix[x][basis[y]]) + "    " + "|"
+    for x in range(len(basis)):
+        strng = (" " * 2) + "|" + "   " + "x" + str(basis[x] + 1) + "   " + "|" + "   " + str(b_vector[x]) + "   " + "|"
+        for y in range(len(matrix[x])):
+            strng += "    " + str(matrix[x][y]) + "    " + "|"
         print(strng)
-        print((" " * 2) + "----" * (len(matrix) + 2))
+        print((" " * 2) + "---------------" * (len(matrix) + 2))
     
     strng = (" " * 2) + "|" + "   " + "Z" + "   " + "|" + "   " + str(z) + "   " + "|"
-    for x in range(len(matrix)):
-        strng += "    " + str(z_vector[x]) + "    " + "|"
+    for y in range(len(matrix[0])):
+        strng += "    " + str(z_vector[y]) + "    " + "|"
     print(strng)
-    print((" " * 2) + "----" * (len(matrix) + 2))
+    print((" " * 2) + "---------------" * (len(matrix) + 2))
 
     strng = (" " * 2) + "|" + "   " + "CO" + "   " + "|" + "   " + "-" + "   " + "|"
-    for x in range(len(matrix)):
-        strng += "    " + str(co_vector[x]) + "    " + "|"
+    for y in range(len(matrix[0])):
+        strng += "    " + str(co_vector[y]) + "    " + "|"
     print(strng)
-    print((" " * 2) + "====" * (len(matrix) + 2))
+    print((" " * 2) + "===============" * (len(matrix) + 2))
 
 
 def noNegative(vector):
@@ -60,17 +60,20 @@ def find_res_row(b_vector):
     return res
 
 
-def compute_co(row, z_vector):
+def compute_co(row, basis, z_vector):
     co = []
     for i in range(len(z_vector)):
-        co.append(abs(z_vector[i]/row[i]))
+        if i in basis: 
+            co.append("-")
+        else:
+            co.append(abs(z_vector[i]/row[i]))
     return co
 
 def find_res_col(co_vector):
     max = -1
     res = 0
-    for i in len(co_vector):
-        if co_vector[i] > max: 
+    for i in range(len(co_vector)):
+        if co_vector[i] != "-" and co_vector[i] > max: 
             max = co_vector[i]
             res = i
     return res
@@ -103,7 +106,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         step+=1
         print("ШАГ " + str(step) + ":")
         resolve_row = find_res_row(b_vector)
-        co_vector = compute_co(resolve_row, z_vector)
+        co_vector = compute_co(matrix[resolve_row], basis, z_vector)
         resolve_col = find_res_col(co_vector)
         printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
         break # test
