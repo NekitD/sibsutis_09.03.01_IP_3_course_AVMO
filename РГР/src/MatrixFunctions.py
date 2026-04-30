@@ -13,7 +13,7 @@ def parse_matrix(matrix_str):
         if not row: 
             continue
             
-        if row == '_':
+        if row == 'Z:':
             finish = True
             continue
             
@@ -41,10 +41,10 @@ def parse_matrix(matrix_str):
             matrix.append(left_part)
             b_vector.append(right_part)
         else:
-            if ':' not in row:
+            if '|' not in row:
                 continue
                 
-            starget, zs = row.split(':')
+            zs, starget = row.split('|')
             if "max" in starget:
                 target = 1
             elif "min" in starget:
