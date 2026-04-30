@@ -168,12 +168,17 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # Основной цикл поиска решения:
     while(True):
         step+=1
+        end = noNegative(b_vector)
         print("ШАГ " + str(step) + ":")
-        resolve_row = find_res_row(b_vector)
-        co_vector = compute_co(matrix[resolve_row], basis, z_vector)
-        resolve_col = find_res_col(co_vector)
+        if end:
+            resolve_row = None
+            resolve_col = None
+        else:
+            resolve_row = find_res_row(b_vector)
+            co_vector = compute_co(matrix[resolve_row], basis, z_vector)
+            resolve_col = find_res_col(co_vector)
         printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col)
-        if(noNegative(b_vector)): break
+        if(end): break
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
         print(f'Выводим из базиса x{resolve_row + 1}')
         print(f'Вводим в базис x{resolve_col + 1}')
