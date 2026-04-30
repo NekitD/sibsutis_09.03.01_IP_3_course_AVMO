@@ -15,34 +15,44 @@ def mulRowVal(row, val):
         row[i] *= val
 
 def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
-    strng = ""
-    strng = (" " * 2) + "|" + "   " + "Б.п" + "   " + "|" + "   " + "1" + "   " + "|"
+    col_width = 12
+    def center(text, width=col_width):
+        text = str(text)
+        if len(text) > width:
+            return text[:width-3] + "..."
+        return text.center(width)
     
-    for x in range(len(matrix[0])):
-        strng += "    " + "x" + str(x + 1) + "    " + "|"
-    print((" " * 2) + "===============" * (len(matrix) + 2))
-    print(strng)
-    print((" " * 2) + "===============" * (len(matrix) + 2))
+    border = "+" + "-" * col_width + "+" + "-" * col_width + "+"
     
+    for _ in range(len(matrix[0])):
+        border += "-" * col_width + "+"
+    print(border.replace("-", "="))
+    
+    header = "|" + center("Б.п") + "|" + center("1") + "|"
+    for i in range(len(matrix[0])):
+        header += center(f"x{i+1}") + "|"
+    print(header)
+    print(border.replace("-", "="))
+    
+
     for x in range(len(basis)):
-        strng = (" " * 2) + "|" + "   " + "x" + str(basis[x] + 1) + "   " + "|" + "   " + str(b_vector[x]) + "   " + "|"
+        row = "|" + center(f"x{basis[x]+1}") + "|" + center(str(b_vector[x])) + "|"
         for y in range(len(matrix[x])):
-            strng += "    " + str(matrix[x][y]) + "    " + "|"
-        print(strng)
-        print((" " * 2) + "---------------" * (len(matrix) + 2))
+            row += center(str(matrix[x][y])) + "|"
+        print(row)
+        print(border)
     
-    strng = (" " * 2) + "|" + "   " + "Z" + "   " + "|" + "   " + str(z) + "   " + "|"
+    z_row = "|" + center("Z") + "|" + center(str(z)) + "|"
     for y in range(len(matrix[0])):
-        strng += "    " + str(z_vector[y]) + "    " + "|"
-    print(strng)
-    print((" " * 2) + "---------------" * (len(matrix) + 2))
-
-    strng = (" " * 2) + "|" + "   " + "CO" + "   " + "|" + "   " + "-" + "   " + "|"
+        z_row += center(str(z_vector[y])) + "|"
+    print(z_row)
+    print(border)
+    
+    co_row = "|" + center("CO") + "|" + center("-") + "|"
     for y in range(len(matrix[0])):
-        strng += "    " + str(co_vector[y]) + "    " + "|"
-    print(strng)
-    print((" " * 2) + "===============" * (len(matrix) + 2))
-
+        co_row += center(str(co_vector[y])) + "|"
+    print(co_row)
+    print(border)
 
 def noNegative(vector):
     for value in vector:
