@@ -46,12 +46,44 @@ def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
         strng += "|" + "    " + str(co_vector[x]) + "    " + "|"
     print(strng)
 
+
+def noNegative(vector):
+    for value in vector:
+        if value < 0: return False
+    return True
+
+
+def find_res_row(b_vector):
+    min = 1
+    res = 0
+    for i in len(b_vector):
+        if b_vector[i] < min: 
+            min = b_vector[i]
+            res = i
+    return res
+
+
+def compute_co(row, z_vector):
+    co = []
+    for i in range(len(z_vector)):
+        co.append(abs(z_vector[i]/row[i]))
+    return co
+
+def find_res_col(co_vector):
+    max = -1
+    res = 0
+    for i in len(co_vector):
+        if co_vector[i] > max: 
+            max = co_vector[i]
+            res = i
+    return res
+
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
     # Формируем базис
     basis = []
-    z_res = 0
+    z_answ = 0
     for x in range(len(matrix)):
         for y in range(len(matrix[x])):
             if matrix[x][y] == -1 or matrix[x][y] == 1:
@@ -65,7 +97,15 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     z_sign = -1 * target
     for z in z_vector: 
         z *= z_sign
-                
+    
+    # ШАГ 3: 
+    # Основной цикл поиска решения:
+    while(not noNegative(b_vector)):
+        resolve_row = find_res_row(b_vector)
+        co_vector = compute_co(resolve_row, z_vector)
+        resolve_col = find_res_col(co_vector)
+        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
+        break # test
 
 
 if __name__ == "__main__":
