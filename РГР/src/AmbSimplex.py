@@ -14,7 +14,11 @@ def mulRowVal(row, val):
     for i in range(len(row)):
         row[i] *= val
 
-def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
+def divRowVal(row, val):
+    for i in range(len(row)):
+        row[i] /= val
+
+def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc):
     col_width = 12
     def center(text, width=col_width):
         text = str(text)
@@ -38,7 +42,10 @@ def printTable(matrix, basis, b_vector, z_vector, z, co_vector):
     for x in range(len(basis)):
         row = "|" + center(f"x{basis[x]+1}") + "|" + center(str(b_vector[x])) + "|"
         for y in range(len(matrix[x])):
-            row += center(str(matrix[x][y])) + "|"
+            if x == rr and y == rc: 
+                row += center(f'[{matrix[x][y]}]') + "|"
+            else:
+                row += center(str(matrix[x][y])) + "|"
         print(row)
         print(border)
     
@@ -118,8 +125,10 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         resolve_row = find_res_row(b_vector)
         co_vector = compute_co(matrix[resolve_row], basis, z_vector)
         resolve_col = find_res_col(co_vector)
-        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector)
-        break # test
+        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, rr, rc)
+        print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
+        print(f'Выводим из базиса x{resolve_row}')
+        print(f'Вводим в базис x{resolve_col}')
 
 
 if __name__ == "__main__":
