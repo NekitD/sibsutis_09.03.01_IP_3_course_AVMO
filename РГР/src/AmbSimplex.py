@@ -59,8 +59,12 @@ def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc):
     print(border)
     
     co_row = "|" + center("CO") + "|" + center("-") + "|"
-    for y in range(len(matrix[0])):
-        co_row += center(str(co_vector[y])) + "|"
+    if(co_vector):
+        for y in range(len(matrix[0])):
+            co_row += center(str(co_vector[y])) + "|"
+    else:
+        for y in range(len(matrix[0])):
+            co_row += center("-") + "|"
     print(co_row)
     print(border)
 
@@ -173,6 +177,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         if end:
             resolve_row = None
             resolve_col = None
+            co_vector = None
         else:
             resolve_row = find_res_row(b_vector)
             co_vector = compute_co(matrix[resolve_row], basis, z_vector)
