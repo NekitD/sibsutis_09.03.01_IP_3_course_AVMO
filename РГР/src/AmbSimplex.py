@@ -83,14 +83,17 @@ def find_res_row(b_vector):
 def compute_co(row, basis, z_vector):
     co = []
     for i in range(len(z_vector)):
-        if i in basis: 
+        if i in basis or row[i] >= 0: 
             co.append("-")
         else:
             co.append(abs(z_vector[i]/row[i]))
     return co
 
 def find_res_col(co_vector):
-    min = co_vector[0]
+    min = 0
+    for i in range(len(co_vector)):
+        if not isinstance(co_vector[i], str):
+            min = co_vector[i]
     res = 0
     for i in range(len(co_vector)):
         if co_vector[i] != "-" and co_vector[i] < min: 
