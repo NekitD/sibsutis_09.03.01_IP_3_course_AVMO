@@ -98,3 +98,21 @@ class Fract:
 
     def __abs__(self):
         return Fract(abs(self.upper), self.lower)
+    
+    def __radd__(self, x):
+        return self.__add__(x)
+
+    def __rsub__(self, x):
+        if isinstance(x, (int, float)):
+            return Fract(x * self.lower - self.upper, self.lower)
+        else:
+            raise TypeError("Ошибка вычитания из дроби!")
+
+    def __rmul__(self, x):
+        return self.__mul__(x)
+
+    def __rtruediv__(self, x):
+        if isinstance(x, (int, float)):
+            return Fract(x * self.lower, self.upper)
+        else:
+            raise TypeError("Ошибка деления на дробь!")
