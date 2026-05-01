@@ -1,11 +1,5 @@
-import math
-from itertools import combinations
 from Fract import Fract
 from MatrixFunctions import parse_matrix
-import numpy as np
-import time
-import copy
-
 
 def print_problem(matrix, b_vector, z_vector, target, alt):
     rows = len(matrix)
