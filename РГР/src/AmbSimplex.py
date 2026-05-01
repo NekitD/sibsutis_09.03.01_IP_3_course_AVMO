@@ -154,11 +154,10 @@ def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_ba
 
 
 def solution(b_vector, z_vector, basis, z_answ, target):
-    s_basis = sorted(basis)
     sol = "Z("
     for i in range(len(z_vector)):
-        if i in s_basis:
-            sol += str(b_vector[s_basis.index(i)])
+        if i in basis:
+            sol += str(b_vector[basis.index(i)])
         else:
             sol += "0"
         if i < len(z_vector) - 1:
