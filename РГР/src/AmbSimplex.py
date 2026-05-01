@@ -223,8 +223,37 @@ def solution(b_vector, z_vector, basis, z_answ, target):
     sol += str(z_answ*target)
     return sol
 
-def com_solution(b_vector, z_vector, basis, z_answ, target):
+def com_solution(solutions, b_vector, z_vector, answer, target):
+    right_sols = []
+    val_matrix = []
+    for i in range(len(solutions)):
+        if solutions[i][2] == answer:
+            right_sols.append(solutions[i])
+    for i in range(len(right_sols)):
+        values = []
+        for j in range(len(b_vector)):
+            values.append(right_sols[i][j])
+        val_matrix.append(values)
+    params = []
+    diffs = []
+    for i in range(len(val_matrix)):
+        diff = max(val_matrix[i]) - min(val_matrix[i])
+        if(diff != 0):
+            params.append(i)
+            diffs.append(diff)
+           
     sol = "Z("
+    for i in range(len(z_vector) - len(b_vector)):
+        if i in params:
+            sol += str(max(params[i])) - "ʎ" + str(i + 1) + "*x" + str(i+1)
+        else:
+            sol += "0"
+        if i < len(z_vector) - len(b_vector) - 1:
+            sol += ", "
+    sol += ")"
+    sol += " = "
+    sol += str(answer*target)
+    return sol
 
 
 def isInf(z_vector, basis):
@@ -275,6 +304,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     for i in range(len(z_vector)):
         z_vector[i] *= -1
     
+    x_sols = []
     # ШАГ 3: 
     # Основной цикл поиска решения:
     while(True):
@@ -296,6 +326,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         print("Соответствующее решение:")
         print(solution(b_vector, z_vector, basis, z_answ, target))
         if(end or status == NO_SOLUTION): break
+        x_sols.append([b_vector, basis, z_answ])
         print()
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
         print(f'Выводим из базиса x{basis[resolve_row] + 1}')
@@ -321,7 +352,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     answer += " = "
 
     if status == INF_SOLUTION:
-        answer += com_solution(b_vector, z_vector, basis, z_answ, target)
+        answer += com_solution(x_sols, b_vector, z_vector, z_answ, target)
     else:
         answer += solution(b_vector, z_vector, basis, z_answ, target)
     print(answer)
