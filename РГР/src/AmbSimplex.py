@@ -223,6 +223,16 @@ def solution(b_vector, z_vector, basis, z_answ, target):
     sol += str(z_answ*target)
     return sol
 
+def com_solution(b_vector, z_vector, basis, z_answ, target):
+    sol = "Z("
+
+
+def isInf(z_vector, basis):
+    for i in range(len(z_vector)):
+        if (z_vector[i] == 0) and (i not in basis):
+            return True
+    return False
+
 #================================================================================================
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     
@@ -280,8 +290,8 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             resolve_row = find_res_row(b_vector)
             co_vector = compute_co(matrix[resolve_row], basis, z_vector)
             resolve_col = find_res_col(co_vector)
-            if resolve_col < 0:
-                status = NO_SOLUTION
+            if resolve_col < 0: status = NO_SOLUTION
+            if isInf(z_vector, basis): status = INF_SOLUTION
         printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
         print("Соответствующее решение:")
         print(solution(b_vector, z_vector, basis, z_answ, target))
@@ -299,6 +309,9 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     if status == NO_SOLUTION:
         print("Нет решения!")
         return
+    
+    if status == INF_SOLUTION:
+        print("Решений бесконечно много:")
 
     answer = "Z_"
     if target > 0:
@@ -306,7 +319,11 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     else:
         answer += "min"
     answer += " = "
-    answer += solution(b_vector, z_vector, basis, z_answ, target)
+
+    if status == INF_SOLUTION:
+        answer += com_solution(b_vector, z_vector, basis, z_answ, target)
+    else:
+        answer += solution(b_vector, z_vector, basis, z_answ, target)
     print(answer)
 #================================================================================================
 
