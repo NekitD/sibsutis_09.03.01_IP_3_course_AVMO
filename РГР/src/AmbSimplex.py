@@ -96,13 +96,15 @@ def compute_co(row, basis, z_vector):
     return co
 
 def find_res_col(co_vector):
-    min = 0
-    res = 0
+    min = None
+    res = -1
     for i in range(len(co_vector)):
         if not isinstance(co_vector[i], str):
             min = co_vector[i]
             res = i
             break
+    if res < 0:
+        return res
     for i in range(len(co_vector)):
         if co_vector[i] != "-" and co_vector[i] < min: 
             min = co_vector[i]
@@ -170,7 +172,11 @@ def solution(b_vector, z_vector, basis, z_answ, target):
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     
     #Исходная задача
-    
+
+    NO_SOLUTION = -1
+    ONE_SOLUTION = 0
+    INF_SOLUTION = 1
+    status = ONE_SOLUTION
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
     # Формируем базис
@@ -207,10 +213,12 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             resolve_row = find_res_row(b_vector)
             co_vector = compute_co(matrix[resolve_row], basis, z_vector)
             resolve_col = find_res_col(co_vector)
+            if resolve_col < 0:
+                status = NO_SOLUTION
         printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
         print("Соответствующее решение:")
         print(solution(b_vector, z_vector, basis, z_answ, target))
-        if(end): break
+        if(end or status == NO_SOLUTION): break
         print()
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
         print(f'Выводим из базиса x{basis[resolve_row] + 1}')
@@ -220,6 +228,11 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # ШАГ 4: Вывод итогового решения
     print()
     print("Итоговое решение:")
+    
+    if status == NO_SOLUTION:
+        print("Нет решения!")
+        return
+
     answer = "Z_"
     if target > 0:
         answer += "max"
