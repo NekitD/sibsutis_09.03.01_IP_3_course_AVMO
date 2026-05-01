@@ -106,8 +106,10 @@ def find_res_col(co_vector):
     return res
 
 
-def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, basis):
+def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_basis):
     matrix = copy.deepcopy(old_matrix)
+    basis = copy.deepcopy(old_basis)
+    basis[rr] = rc
     z_vector = []
     b_vector = []
     
@@ -142,7 +144,7 @@ def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, basis)
 
     # Метод прямоугольников (Ответ)
     z_answ = old_z_answ - ((old_z_vector[rc] * old_b_vector[rr]) / old_matrix[rr][rc])
-    return matrix, b_vector, z_vector, z_answ, 
+    return matrix, b_vector, z_vector, basis, z_answ, 
 
 
 
@@ -187,7 +189,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
         print(f'Выводим из базиса x{resolve_row + 1}')
         print(f'Вводим в базис x{resolve_col + 1}')
-        matrix, b_vector, z_vector, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
+        matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
 
 
 if __name__ == "__main__":
