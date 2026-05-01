@@ -17,10 +17,6 @@ def mulRowVal(row, val):
     for i in range(len(row)):
         row[i] *= val
 
-def divRowVal(row, val):
-    for i in range(len(row)):
-        row[i] /= val
-
 def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, target):
     col_width = 12
     def center(text, width=col_width):
@@ -115,40 +111,41 @@ def find_res_col(co_vector):
 
 
 def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_basis):
-    matrix = copy.deepcopy(old_matrix)
-    basis = copy.deepcopy(old_basis)
+    rows = len(old_matrix)
+    cols = len(old_matrix[0])
+    
+    matrix = [[Fract(0) for _ in range(cols)] for _ in range(rows)]
+    b_vector = [Fract(0) for _ in range(rows)]
+    z_vector = [Fract(0) for _ in range(cols)]
+    basis = old_basis[:]
     basis[rr] = rc
-    z_vector = []
-    b_vector = []
     
     # Делим разрешающую строку на разрешающий элемент
-    divRowVal(matrix[rr], old_matrix[rr][rc])
+    for col in range(cols):
+        matrix[rr][col] = old_matrix[rr][col] / old_matrix[rr][rc]
    
-    #Обнуляем разрешающий столбец, кроме разршающей строки
-    for r in range(len(old_matrix)):
+    #Обнуляем разрешающий столбец, кроме разрешающей строки
+    for r in range(rows):
         if r != rr:
             matrix[r][rc] = 0
 
     # Метод прямоугольников (матрица)
-    for x in range(len(matrix)):
-        for y in range(len(matrix[x])):
-            if y not in basis or x == rr or y == rc: continue
+    for x in range(rows):
+        for y in range(cols):
+            if x == rr or y == rc: continue
             matrix[x][y] = old_matrix[x][y] - ((old_matrix[rr][y] * old_matrix[x][rc]) / old_matrix[rr][rc])
     
     # Метод прямоугольников (z-строка)
-    for y in range(len(old_z_vector)):
-        z = 0
+    for y in range(cols):
         if y != rc:
-            z = old_z_vector[y] - ((old_matrix[rr][y] * old_z_vector[rc]) / old_matrix[rr][rc])
-        z_vector.append(z)
+            z_vector[y] = old_z_vector[y] - ((old_matrix[rr][y] * old_z_vector[rc]) / old_matrix[rr][rc])
     
     # Метод прямоугольников (b-строка)
-    for x in range(len(old_b_vector)):
+    for x in range(rows):
         if x == rr: 
-            b = old_b_vector[rr]/old_matrix[rr][rc]
+            b_vector[x] = old_b_vector[x]/old_matrix[rr][rc]
         else:
-            b = old_b_vector[x] - ((old_b_vector[rr] * old_matrix[x][rc]) / old_matrix[rr][rc])
-        b_vector.append(b)
+            b_vector[x] = old_b_vector[x] - ((old_b_vector[rr] * old_matrix[x][rc]) / old_matrix[rr][rc])
 
     # Метод прямоугольников (Ответ)
     z_answ = old_z_answ - ((old_z_vector[rc] * old_b_vector[rr]) / old_matrix[rr][rc])
@@ -171,6 +168,9 @@ def solution(b_vector, z_vector, basis, z_answ, target):
 
 
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
+    
+    #Исходная задача
+    
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
     # Формируем базис
