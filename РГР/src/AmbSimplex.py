@@ -231,35 +231,30 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
     num_basis = len(b_vector)
     num_real_vars = num_vars - num_basis
     
-    # Собираем все найденные решения
     all_solutions = []
     for sol in solutions:
         b_vec, basis, _ = sol
-        # Формируем вектор решения
+
         sol_vec = [0] * num_real_vars
         for i, var in enumerate(basis):
             if var < num_real_vars:
                 sol_vec[var] = b_vec[i]
         all_solutions.append(sol_vec)
     
-    # Добавляем текущее решение
     current_sol = [0] * num_real_vars
     for i, var in enumerate(basis):
         if var < num_real_vars:
             current_sol[var] = b_vector[i]
     all_solutions.append(current_sol)
     
-    # Удаляем дубликаты
     unique_solutions = []
     for sol in all_solutions:
         if sol not in unique_solutions:
             unique_solutions.append(sol)
-    
-    # Если только одно уникальное решение - то оно единственное
+
     if len(unique_solutions) == 1:
         return solution(b_vector, z_vector, basis, z_answ, target)
-    
-    # Находим переменные, которые меняются, и их диапазоны
+
     var_info = []  # [(index, min_val, max_val, diff)]
     for j in range(num_real_vars):
         values = [sol[j] for sol in unique_solutions]
@@ -268,27 +263,22 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
         if min_val != max_val:
             var_info.append((j, min_val, max_val, max_val - min_val))
     
-    # Формируем параметрическое представление
     result = "Z("
     param_names = []
     param_ranges = []
     
-    # Находим базовое решение с максимальными значениями
     base_sol = [0] * num_real_vars
     for j in range(num_real_vars):
         if any(j == v[0] for v in var_info):
             for v in var_info:
                 if v[0] == j:
-                    base_sol[j] = v[2]  # берем максимальное значение
+                    base_sol[j] = v[2]  # макс. значение
                     break
         else:
-            # Константная переменная
             base_sol[j] = unique_solutions[0][j]
     
-    # Выводим в формате: значение - параметр
     for j in range(num_real_vars):
         if j in [v[0] for v in var_info]:
-            # Находим информацию о переменной
             for v in var_info:
                 if v[0] == j:
                     min_val, max_val, diff = v[1], v[2], v[3]
