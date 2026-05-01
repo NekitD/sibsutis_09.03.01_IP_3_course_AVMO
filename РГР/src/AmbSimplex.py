@@ -258,6 +258,7 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
         max_val = max(values)
         if min_val != max_val:
             var_info.append((j, min_val, max_val, max_val - min_val))
+    
     VAR_INDEX = 0
     VAR_MIN = 1 
     VAR_MAX = 2
@@ -268,6 +269,7 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
     param_names = []
     param_ranges = []
     
+    # Решение с максимальными значениями
     base_sol = [0] * num_real_vars
     for j in range(num_real_vars):
         if any(j == v[VAR_INDEX] for v in var_info):
@@ -278,8 +280,10 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
         else:
             base_sol[j] = unique_solutions[0][j]
     
+    # Общий вид решения
     for j in range(num_real_vars):
         if j in [v[VAR_INDEX] for v in var_info]:
+            # Переменная изменяема
             for v in var_info:
                 if v[VAR_INDEX] == j:
                     min_val, max_val, diff = v[VAR_MIN], v[VAR_MAX], v[VAR_DIFF]
@@ -293,13 +297,16 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
                         result += f"{base_sol[j]} - {param_name}"
                     break
         else:
+            # Переменная неизменяема
             result += str(base_sol[j])
         
         if j < num_real_vars - 1:
             result += ", "
     
+    # Ответ
     result += f") = {z_answ * target}"
     
+    # Описание параметров
     if param_names:
         result += "\nгде "
         range_strs = []
