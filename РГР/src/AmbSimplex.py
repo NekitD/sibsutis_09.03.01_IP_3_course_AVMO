@@ -231,6 +231,7 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
     num_basis = len(b_vector)
     num_real_vars = num_vars - num_basis
     
+    # Распаковываем решения
     all_solutions = []
     for sol in solutions:
         b_vec, basis, _ = sol
@@ -241,20 +242,15 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
                 sol_vec[var] = b_vec[i]
         all_solutions.append(sol_vec)
     
-    current_sol = [0] * num_real_vars
-    for i, var in enumerate(basis):
-        if var < num_real_vars:
-            current_sol[var] = b_vector[i]
-    all_solutions.append(current_sol)
-    
+    # Избегаем дубликатов
     unique_solutions = []
     for sol in all_solutions:
         if sol not in unique_solutions:
             unique_solutions.append(sol)
-
     if len(unique_solutions) == 1:
         return solution(b_vector, z_vector, basis, z_answ, target)
 
+    # Список переменных (с информаией)
     var_info = []  # [(index, min_val, max_val, diff)]
     for j in range(num_real_vars):
         values = [sol[j] for sol in unique_solutions]
@@ -262,27 +258,32 @@ def com_solution(solutions, b_vector, z_vector, z_answ, target):
         max_val = max(values)
         if min_val != max_val:
             var_info.append((j, min_val, max_val, max_val - min_val))
+    VAR_INDEX = 0
+    VAR_MIN = 1 
+    VAR_MAX = 2
+    VAR_DIFF = 3
     
+    # Формирование строки решения
     result = "Z("
     param_names = []
     param_ranges = []
     
     base_sol = [0] * num_real_vars
     for j in range(num_real_vars):
-        if any(j == v[0] for v in var_info):
+        if any(j == v[VAR_INDEX] for v in var_info):
             for v in var_info:
-                if v[0] == j:
-                    base_sol[j] = v[2]  # макс. значение
+                if v[VAR_INDEX] == j:
+                    base_sol[j] = v[VAR_MAX] 
                     break
         else:
             base_sol[j] = unique_solutions[0][j]
     
     for j in range(num_real_vars):
-        if j in [v[0] for v in var_info]:
+        if j in [v[VAR_INDEX] for v in var_info]:
             for v in var_info:
-                if v[0] == j:
-                    min_val, max_val, diff = v[1], v[2], v[3]
-                    param_name = f"λ_{j+1}"
+                if v[VAR_INDEX] == j:
+                    min_val, max_val, diff = v[VAR_MIN], v[VAR_MAX], v[VAR_DIFF]
+                    param_name = f"λ{j+1}"
                     param_names.append(param_name)
                     param_ranges.append((param_name, diff))
                     
