@@ -155,12 +155,12 @@ def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_ba
 
 def solution(b_vector, z_vector, basis, z_answ, target):
     sol = "Z("
-    for i in range(len(z_vector)):
+    for i in range(len(z_vector) - len(b_vector)):
         if i in basis:
             sol += str(b_vector[basis.index(i)])
         else:
             sol += "0"
-        if i < len(z_vector) - 1:
+        if i < len(z_vector) - len(b_vector) - 1:
             sol += ", "
     sol += ")"
     sol += " = "
