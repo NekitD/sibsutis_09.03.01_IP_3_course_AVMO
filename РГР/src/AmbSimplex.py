@@ -101,10 +101,12 @@ def compute_co(row, basis, z_vector):
 
 def find_res_col(co_vector):
     min = 0
+    res = 0
     for i in range(len(co_vector)):
         if not isinstance(co_vector[i], str):
             min = co_vector[i]
-    res = 0
+            res = i
+            break
     for i in range(len(co_vector)):
         if co_vector[i] != "-" and co_vector[i] < min: 
             min = co_vector[i]
@@ -196,7 +198,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         step+=1
         end = noNegative(b_vector)
         print()
-        print("ШАГ " + str(step) + ":")
+        print("Таблица № " + str(step) + ":")
         if end:
             resolve_row = None
             resolve_col = None
@@ -211,7 +213,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         if(end): break
         print()
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
-        print(f'Выводим из базиса x{resolve_row + 1}')
+        print(f'Выводим из базиса x{basis[resolve_row] + 1}')
         print(f'Вводим в базис x{resolve_col + 1}')
         matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
     
