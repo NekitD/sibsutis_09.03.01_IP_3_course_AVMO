@@ -7,12 +7,16 @@ import time
 import copy
 
 
-def print_problem(matrix, b_vector, z_vector, target):
+def print_problem(matrix, b_vector, z_vector, target, alt):
     rows = len(matrix)
     cols = len(matrix[0])
     
     # Вывод целевой функции
-    print("Z = ", end="")
+    if alt:
+        print("-Z = ", end="")
+        target *= -1
+    else:
+        print("Z = ", end="")
     first = True
     for j in range(cols):
         if z_vector[j] != 0:
@@ -229,7 +233,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
 
     print()
     print("Исходная задача:")
-    print_problem(matrix, b_vector, z_vector, target)
+    print_problem(matrix, b_vector, z_vector, target, False)
     print()
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
@@ -246,18 +250,20 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
                         mulRowVal(matrix[x], -1)
                         b_vector[x] *= -1
                     break
-    
-    for z in z_vector: 
-        z *= target
 
     print("Преобразованная задача:")
-    print_problem(matrix, b_vector, z_vector, target)
+    for i in range(len(z_vector)):
+        z_vector[i] *= target
+    if target > 0:
+        print_problem(matrix, b_vector, z_vector, target, False)
+    else:
+        print_problem(matrix, b_vector, z_vector, target, True)
     print()
 
     # ШАГ 2: 
-    # Формируем Z-строку
-    for z in z_vector: 
-        z *= -1
+    # Формируем Z-строку в таблице
+    for i in range(len(z_vector)):
+        z_vector[i] *= -1
     
     # ШАГ 3: 
     # Основной цикл поиска решения:
