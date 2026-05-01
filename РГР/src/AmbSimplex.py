@@ -7,10 +7,66 @@ import time
 import copy
 
 
-def isBasic(x, y, matrix):
+def print_problem(matrix, b_vector, z_vector, target):
+    rows = len(matrix)
+    cols = len(matrix[0])
+    
+    # Вывод целевой функции
+    print("Z = ", end="")
+    first = True
+    for j in range(cols):
+        if z_vector[j] != 0:
+            k = z_vector[j]
+            if not first and k > 0:
+                print(" + ", end="")
+            elif not first and k < 0:
+                print(" - ", end="")
+            elif first and k < 0:
+                print("-", end="")
+            
+            abs_k = abs(k)
+            if abs_k == 1:
+                print(f"x{j+1}", end="")
+            else:
+                print(f"{abs_k}*x{j+1}", end="")
+            first = False
+    
+    if target > 0:
+        print(" -> max")
+    else:
+        print(" -> min")
+    
+    # Вывод ограничений
+    for i in range(rows):
+        print("| ", end="")
+        first = True
+        for j in range(cols):
+            if matrix[i][j] != 0:
+                k = matrix[i][j]
+                if not first and k > 0:
+                    print(" + ", end="")
+                elif not first and k < 0:
+                    print(" - ", end="")
+                elif first and k < 0:
+                    print("-", end="")
+                
+                abs_k = abs(k)
+                if abs_k == 1:
+                    print(f"x{j+1}", end="")
+                else:
+                    print(f"{abs_k}*x{j+1}", end="")
+                first = False
+        
+        print(f" = {b_vector[i]}")
+
+
+
+def isBasic(x, y, matrix, z_vector):
     for i in range(len(matrix)):
         if ((i != x) and (matrix[i][y]) != 0):
             return False
+    if z_vector[y] != 0:
+        return False
     return True
 
 def mulRowVal(row, val):
@@ -125,11 +181,6 @@ def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_ba
     # Делим разрешающую строку на разрешающий элемент
     for col in range(cols):
         matrix[rr][col] = old_matrix[rr][col] / old_matrix[rr][rc]
-   
-    #Обнуляем разрешающий столбец, кроме разрешающей строки
-    for r in range(rows):
-        if r != rr:
-            matrix[r][rc] = 0
 
     # Метод прямоугольников (матрица)
     for x in range(rows):
@@ -168,15 +219,18 @@ def solution(b_vector, z_vector, basis, z_answ, target):
     sol += str(z_answ*target)
     return sol
 
-
+#================================================================================================
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     
-    #Исходная задача
-
     NO_SOLUTION = -1
     ONE_SOLUTION = 0
     INF_SOLUTION = 1
     status = ONE_SOLUTION
+
+    print()
+    print("Исходная задача:")
+    print_problem(matrix, b_vector, z_vector, target)
+    print()
     # ШАГ 1: 
     # Домножаем строки матрицы на -1 при необходимости.
     # Формируем базис
@@ -186,17 +240,24 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     for x in range(len(matrix)):
         for y in range(len(matrix[x])):
             if matrix[x][y] == -1 or matrix[x][y] == 1:
-                if (isBasic(x, y, matrix)):
+                if (isBasic(x, y, matrix, z_vector)):
                     basis.append(y)
                     if matrix[x][y] < 0:
                         mulRowVal(matrix[x], -1)
                         b_vector[x] *= -1
                     break
+    
+    for z in z_vector: 
+        z *= target
+
+    print("Преобразованная задача:")
+    print_problem(matrix, b_vector, z_vector, target)
+    print()
+
     # ШАГ 2: 
     # Формируем Z-строку
-    z_sign = -1 * target
     for z in z_vector: 
-        z *= z_sign
+        z *= -1
     
     # ШАГ 3: 
     # Основной цикл поиска решения:
@@ -241,7 +302,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     answer += " = "
     answer += solution(b_vector, z_vector, basis, z_answ, target)
     print(answer)
-
+#================================================================================================
 
 if __name__ == "__main__":
     path = ".\examples"
