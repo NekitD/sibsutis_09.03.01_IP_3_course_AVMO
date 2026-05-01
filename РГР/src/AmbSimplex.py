@@ -313,7 +313,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
 if __name__ == "__main__":
     path = ".\examples"
     print(80 * "-")
-    print( (20 * " ") + "РГР" + (20 * " "))
+    print( (30 * " ") + "РГР" + (30 * " "))
     print( (10 * " ") + "Решение ЗЛП двойственным симплекс-методом" + (20 * " "))
     print(80 * "-")
     while(1):
