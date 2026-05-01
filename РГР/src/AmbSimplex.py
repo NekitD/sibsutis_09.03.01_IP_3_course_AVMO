@@ -21,7 +21,7 @@ def divRowVal(row, val):
     for i in range(len(row)):
         row[i] /= val
 
-def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc):
+def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, target):
     col_width = 12
     def center(text, width=col_width):
         text = str(text)
@@ -52,7 +52,13 @@ def printTable(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc):
         print(row)
         print(border)
     
-    z_row = "|" + center("Z") + "|" + center(str(z)) + "|"
+    z_row = "|"
+    if target > 0: 
+        z_row += center("Z")
+    else:
+        z_row += center("-Z")
+    z_row += "|" + center(str(z)) + "|"
+
     for y in range(len(matrix[0])):
         z_row += center(str(z_vector[y])) + "|"
     print(z_row)
@@ -147,6 +153,21 @@ def new_table(old_matrix, old_b_vector, old_z_vector, old_z_answ, rr, rc, old_ba
     return matrix, b_vector, z_vector, basis, z_answ, 
 
 
+def solution(b_vector, z_vector, basis, z_answ, target):
+    s_basis = sorted(basis)
+    sol = "Z("
+    for i in range(len(z_vector)):
+        if i in s_basis:
+            sol += str(b_vector[s_basis.index(i)])
+        else:
+            sol += "0"
+        if i < len(z_vector) - 1:
+            sol += ", "
+    sol += ")"
+    sol += " = "
+    sol += str(z_answ*target)
+    return sol
+
 
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     # ШАГ 1: 
@@ -175,6 +196,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     while(True):
         step+=1
         end = noNegative(b_vector)
+        print()
         print("ШАГ " + str(step) + ":")
         if end:
             resolve_row = None
@@ -184,12 +206,27 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             resolve_row = find_res_row(b_vector)
             co_vector = compute_co(matrix[resolve_row], basis, z_vector)
             resolve_col = find_res_col(co_vector)
-        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col)
+        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+        print("Соответствующее решение:")
+        print(solution(b_vector, z_vector, basis, z_answ, target))
         if(end): break
+        print()
         print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
         print(f'Выводим из базиса x{resolve_row + 1}')
         print(f'Вводим в базис x{resolve_col + 1}')
         matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
+    
+    # ШАГ 4: Вывод итогового решения
+    print()
+    print("Итоговое решение:")
+    answer = "Z_"
+    if target > 0:
+        answer += "max"
+    else:
+        answer += "min"
+    answer += " = "
+    answer += solution(b_vector, z_vector, basis, z_answ, target)
+    print(answer)
 
 
 if __name__ == "__main__":
