@@ -262,8 +262,8 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
     # Сортировка решений по x1
     all_solutions.sort(key=lambda x: float(x[0]))
     
-    sol_min = all_solutions[0]  # решение с минимальным x1 (2, 1)
-    sol_max = all_solutions[-1]  # решение с максимальным x1 (4, 0)
+    sol_min = all_solutions[0]  # решение с минимальным x1
+    sol_max = all_solutions[-1]  # решение с максимальным x1
     
     # Разица между макс. и мин. для каждого x
     diff = []
