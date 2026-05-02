@@ -116,3 +116,5 @@ class Fract:
             return Fract(x * self.lower, self.upper)
         else:
             raise TypeError("Ошибка деления на дробь!")
+    def __float__(self):
+        return self.upper / self.lower
