@@ -217,100 +217,87 @@ def solution(b_vector, z_vector, basis, z_answ, target):
     sol += str(z_answ*target)
     return sol
 
-def com_solution(solutions, b_vector, z_vector, z_answ, target):
-    if not solutions:
-        return solution(b_vector, z_vector, basis, z_answ, target)
-    
+
+def com_solution(solutions, final_basis, z_vector, z_answ, target):
     num_vars = len(z_vector)
-    num_basis = len(b_vector)
+    num_basis = len(final_basis)
     num_real_vars = num_vars - num_basis
     
-    # Распаковываем решения
+    # Все уникальные решения
     all_solutions = []
-    for sol in solutions:
-        b_vec, basis, _ = sol
 
-        sol_vec = [0] * num_real_vars
+    for b_vec, basis, _ in solutions:
+        sol_vec = [Fract(0) for _ in range(num_real_vars)]
         for i, var in enumerate(basis):
             if var < num_real_vars:
                 sol_vec[var] = b_vec[i]
-        all_solutions.append(sol_vec)
-    
-    # Избегаем дубликатов
-    unique_solutions = []
-    for sol in all_solutions:
-        if sol not in unique_solutions:
-            unique_solutions.append(sol)
-    if len(unique_solutions) == 1:
-        return solution(b_vector, z_vector, basis, z_answ, target)
 
-    # Список переменных (с информаией)
-    var_info = []  # [(index, min_val, max_val, diff)]
-    for j in range(num_real_vars):
-        values = [sol[j] for sol in unique_solutions]
-        min_val = min(values)
-        max_val = max(values)
-        if min_val != max_val:
-            var_info.append((j, min_val, max_val, max_val - min_val))
+        if all(v >= 0 for v in sol_vec):
+            if sol_vec not in all_solutions:
+                all_solutions.append(sol_vec)
+
+    # Фильтр нулевого решения
+    non_zero_solutions = []
+    for sol in all_solutions:
+        not_null = False
+        for v in sol:
+            if v != 0:
+                not_null = True
+                break
+        if not_null:
+            non_zero_solutions.append(sol)
     
-    VAR_INDEX = 0
-    VAR_MIN = 1 
-    VAR_MAX = 2
-    VAR_DIFF = 3
+    if len(non_zero_solutions) >= 2:
+        all_solutions = non_zero_solutions
     
-    # Формирование строки решения
+    if len(all_solutions) == 1:
+        sol = all_solutions[0]
+        strs = []
+        for val in sol:
+            strs.append(str(val))
+        all_x = ", ".join(strs)
+        answer = "Z(" + all_x + ") = " + str(z_answ * target)
+        return answer
+    
+    # Сортировка решений по x1
+    all_solutions.sort(key=lambda x: float(x[0]))
+    
+    sol_min = all_solutions[0]  # решение с минимальным x1 (2, 1)
+    sol_max = all_solutions[-1]  # решение с максимальным x1 (4, 0)
+    
+    # Разица между макс. и мин. для каждого x
+    diff = []
+    for i in range(num_real_vars):
+        d = sol_max[i] - sol_min[i]
+        diff.append(d)
+    
+    # Формирование ответа
     result = "Z("
-    param_names = []
-    param_ranges = []
-    
-    # Решение с максимальными значениями
-    base_sol = [0] * num_real_vars
     for j in range(num_real_vars):
-        if any(j == v[VAR_INDEX] for v in var_info):
-            for v in var_info:
-                if v[VAR_INDEX] == j:
-                    base_sol[j] = v[VAR_MAX] 
-                    break
+        if diff[j] == 0:
+            # Переменная не меняется
+            result += str(sol_min[j])
         else:
-            base_sol[j] = unique_solutions[0][j]
-    
-    # Общий вид решения
-    for j in range(num_real_vars):
-        if j in [v[VAR_INDEX] for v in var_info]:
-            # Переменная изменяема
-            for v in var_info:
-                if v[VAR_INDEX] == j:
-                    min_val, max_val, diff = v[VAR_MIN], v[VAR_MAX], v[VAR_DIFF]
-                    param_name = f"λ{j+1}"
-                    param_names.append(param_name)
-                    param_ranges.append((param_name, diff))
-                    
-                    if base_sol[j] == 0:
-                        result += param_name
-                    else:
-                        result += f"{base_sol[j]} - {param_name}"
-                    break
-        else:
-            # Переменная неизменяема
-            result += str(base_sol[j])
+            # Переменная меняется
+            if diff[j] > 0:
+                if diff[j] == 1:
+                    result += f"{sol_min[j]} + λ"
+                else:
+                    result += f"{sol_min[j]} + {diff[j]}·λ"
+            else:
+                abs_diff = abs(diff[j])
+                if abs_diff == 1:
+                    result += f"{sol_min[j]} - λ"
+                else:
+                    result += f"{sol_min[j]} - {abs_diff}·λ"
         
         if j < num_real_vars - 1:
             result += ", "
     
-    # Ответ
     result += f") = {z_answ * target}"
-    
-    # Описание параметров
-    if param_names:
-        result += "\nгде "
-        range_strs = []
-        for i, (p_name, p_range) in enumerate(param_ranges):
-            range_strs.append(f"{p_name} ∈ [0, {p_range}]")
-        result += ", ".join(range_strs)
-        result += " - параметры"
+    result += f"\nгде λ ∈ [0, 1] - параметр"
     
     return result
-
 
 def isInf(z_vector, basis):
     for i in range(len(z_vector)):
@@ -408,7 +395,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     answer += " = "
 
     if status == INF_SOLUTION:
-        answer += com_solution(x_sols, b_vector, z_vector, z_answ, target)
+        answer += com_solution(x_sols, basis, z_vector, z_answ, target)
     else:
         answer += solution(b_vector, z_vector, basis, z_answ, target)
     print(answer)
