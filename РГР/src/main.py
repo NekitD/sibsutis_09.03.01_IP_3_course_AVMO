@@ -283,13 +283,13 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
                 if diff[j] == 1:
                     result += f"{sol_min[j]} + λ"
                 else:
-                    result += f"{sol_min[j]} + {diff[j]}·λ"
+                    result += f"{sol_min[j]} + {diff[j]}*λ"
             else:
                 abs_diff = abs(diff[j])
                 if abs_diff == 1:
                     result += f"{sol_min[j]} - λ"
                 else:
-                    result += f"{sol_min[j]} - {abs_diff}·λ"
+                    result += f"{sol_min[j]} - {abs_diff}*λ"
         
         if j < num_real_vars - 1:
             result += ", "

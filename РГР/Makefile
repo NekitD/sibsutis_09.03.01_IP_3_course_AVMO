@@ -1,5 +1,5 @@
 
-RGR = src\AmbSimplex.py
+RGR = src\main.py
 
 all: run
 
