@@ -250,15 +250,6 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
     if len(non_zero_solutions) >= 2:
         all_solutions = non_zero_solutions
     
-    if len(all_solutions) == 1:
-        sol = all_solutions[0]
-        strs = []
-        for val in sol:
-            strs.append(str(val))
-        all_x = ", ".join(strs)
-        answer = "Z(" + all_x + ") = " + str(z_answ * target)
-        return answer
-    
     # Сортировка решений по x1
     all_solutions.sort(key=lambda x: float(x[0]))
     
