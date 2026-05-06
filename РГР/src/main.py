@@ -223,7 +223,7 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
     num_basis = len(final_basis)
     num_real_vars = num_vars - num_basis
     
-    # Все уникальные решения
+    # Все решения
     all_solutions = []
 
     for b_vec, basis, _ in solutions:
@@ -239,12 +239,14 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
     # Фильтр нулевого решения
     non_zero_solutions = []
     for sol in all_solutions:
-        not_null = False
+        good = False
         for v in sol:
             if v != 0:
-                not_null = True
+                good = True
                 break
-        if not_null:
+        if noNegative(sol):
+            good = False
+        if good:
             non_zero_solutions.append(sol)
     
     if len(non_zero_solutions) >= 2:
@@ -296,6 +298,89 @@ def isInf(z_vector, basis):
             return True
     return False
 
+def printTableSim(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, target):
+    col_width = 12
+    def center(text, width=col_width):
+        text = str(text)
+        if len(text) > width:
+            return text[:width-3] + "..."
+        return text.center(width)
+    
+    border = "+" + "-" * col_width + "+" + "-" * col_width + "+"
+    
+    for _ in range(len(matrix[0])):
+        border += "-" * col_width + "+"
+    print(border.replace("-", "="))
+    
+    header = "|" + center("Б.п") + "|" + center("1") + "|"
+    for i in range(len(matrix[0])):
+        header += center(f"x{i+1}") + "|"
+    print(header)
+    print(border.replace("-", "="))
+    
+    for x in range(len(basis)):
+        row = "|" + center(f"x{basis[x]+1}") + "|" + center(str(b_vector[x])) + "|"
+        for y in range(len(matrix[x])):
+            if x == rr and y == rc:
+                row += center(f'[{matrix[x][y]}]') + "|"
+            else:
+                row += center(str(matrix[x][y])) + "|"
+        print(row)
+        print(border)
+    
+    z_row = "|"
+    if target > 0:
+        z_row += center("Z")
+    else:
+        z_row += center("-Z")
+    z_row += "|" + center(str(z)) + "|"
+    
+    for y in range(len(matrix[0])):
+        z_row += center(str(z_vector[y])) + "|"
+    print(z_row)
+    print(border)
+
+
+#----------------------------------------------------------
+def find_res_col_sim(z_vector, basis):
+    max = None
+    res = -1
+    if res < 0:
+        return res
+    for i in range(len(z_vector)):
+        if i not in basis and abs(z_vector[i]) > max: 
+            max = z_vector[i]
+            res = i
+    return res
+
+def compute_co_sim(col, b_vector):
+    co = []
+    for i in range(len(b_vector)):
+        if col[i] <= 0: 
+            co.append("-")
+        else:
+            co.append(b_vector[i]/col[i])
+    return co
+
+def find_res_row_sim(co_vector):
+    min = None
+    res = -1
+    for i in range(len(co_vector)):
+        if not isinstance(co_vector[i], str):
+            min = co_vector[i]
+            res = i
+            break
+    if res < 0:
+        return res
+    for i in range(len(co_vector)):
+        if co_vector[i] != "-" and co_vector[i] < min: 
+            min = co_vector[i]
+            res = i
+    return res
+
+
+
+
 #================================================================================================
 def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     
@@ -341,6 +426,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     x_sols = []
     # ШАГ 3: 
     # Основной цикл поиска решения:
+    accomp = False
     while(True):
         step+=1
         end = noNegative(b_vector)
@@ -348,24 +434,44 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         print()
         print("Таблица № " + str(step) + ":")
         if end:
-            resolve_row = None
-            resolve_col = None
-            co_vector = None
+            if (status == INF_SOLUTION) and (accomp):
+                resolve_col = find_res_col_sim(z_vector, basis)
+                resolve_col_content = []
+                for x in range(len(matrix)):
+                    resolve_col_content.append(matrix[x][resolve_col])
+                co_vector = compute_co_sim(resolve_col_content, b_vector)
+                resolve_row = find_res_row_sim(co_vector)
+                printTableSim(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
+                print(f'Выводим из базиса x{basis[resolve_row] + 1}')
+                print(f'Вводим в базис x{resolve_col + 1}')
+                matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
+                printTableSim(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                accomp = False
+            else:
+                if status != INF_SOLUTION:
+                    printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                resolve_row = None
+                resolve_col = None
+                co_vector = None
+                accomp = True
         else:
             resolve_row = find_res_row(b_vector)
             co_vector = compute_co(matrix[resolve_row], basis, z_vector)
             resolve_col = find_res_col(co_vector)
             if resolve_col < 0: status = NO_SOLUTION
             if isInf(z_vector, basis): status = INF_SOLUTION
-        printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+            printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+        
         print("Соответствующее решение:")
         print(solution(b_vector, z_vector, basis, z_answ, target))
-        if(end or status == NO_SOLUTION): break
+        if((end and accomp == False) or status == NO_SOLUTION): break
         print()
-        print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
-        print(f'Выводим из базиса x{basis[resolve_row] + 1}')
-        print(f'Вводим в базис x{resolve_col + 1}')
-        matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
+        if not accomp: 
+            print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
+            print(f'Выводим из базиса x{basis[resolve_row] + 1}')
+            print(f'Вводим в базис x{resolve_col + 1}')
+            matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
     
     # ШАГ 4: Вывод итогового решения
     print()
