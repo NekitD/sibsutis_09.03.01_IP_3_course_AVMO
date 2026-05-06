@@ -244,8 +244,8 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
             if v != 0:
                 good = True
                 break
-        if noNegative(sol):
-            good = False
+        # if noNegative(sol):
+        #     good = False
         if good:
             non_zero_solutions.append(sol)
     
@@ -306,15 +306,18 @@ def printTableSim(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, targe
             return text[:width-3] + "..."
         return text.center(width)
     
-    border = "+" + "-" * col_width + "+" + "-" * col_width + "+"
+    num_cols = len(matrix[0])
     
-    for _ in range(len(matrix[0])):
+    border = "+" + "-" * col_width + "+" + "-" * col_width + "+"
+    for _ in range(num_cols):
         border += "-" * col_width + "+"
+    border += "-" * col_width + "+" 
     print(border.replace("-", "="))
     
     header = "|" + center("Б.п") + "|" + center("1") + "|"
-    for i in range(len(matrix[0])):
+    for i in range(num_cols):
         header += center(f"x{i+1}") + "|"
+    header += center("CO") + "|"
     print(header)
     print(border.replace("-", "="))
     
@@ -325,6 +328,10 @@ def printTableSim(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, targe
                 row += center(f'[{matrix[x][y]}]') + "|"
             else:
                 row += center(str(matrix[x][y])) + "|"
+        if co_vector and x < len(co_vector):
+            row += center(str(co_vector[x])) + "|"
+        else:
+            row += center("-") + "|"
         print(row)
         print(border)
     
@@ -337,20 +344,20 @@ def printTableSim(matrix, basis, b_vector, z_vector, z, co_vector, rr, rc, targe
     
     for y in range(len(matrix[0])):
         z_row += center(str(z_vector[y])) + "|"
+    z_row += center("-") + "|" 
     print(z_row)
     print(border)
 
 
 #----------------------------------------------------------
 def find_res_col_sim(z_vector, basis):
-    max = None
+    max_val = None
     res = -1
-    if res < 0:
-        return res
     for i in range(len(z_vector)):
-        if i not in basis and abs(z_vector[i]) > max: 
-            max = z_vector[i]
-            res = i
+        if i not in basis and z_vector[i] <= 0: 
+            if max_val is None or z_vector[i] > max_val:
+                max_val = z_vector[i]
+                res = i
     return res
 
 def compute_co_sim(col, b_vector):
@@ -432,25 +439,47 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
         end = noNegative(b_vector)
         x_sols.append([b_vector, basis, z_answ])
         print()
-        print("Таблица № " + str(step) + ":")
+        # print("Таблица № " + str(step) + ":")
         if end:
             if (status == INF_SOLUTION) and (accomp):
+                resolve_col = None 
+                resolve_row = None
+                print("Таблица № " + str(step - 1) + ":")
+                printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
                 resolve_col = find_res_col_sim(z_vector, basis)
                 resolve_col_content = []
                 for x in range(len(matrix)):
                     resolve_col_content.append(matrix[x][resolve_col])
                 co_vector = compute_co_sim(resolve_col_content, b_vector)
                 resolve_row = find_res_row_sim(co_vector)
+                print()
+                print("Таблица № " + str(step - 1) + " (Для обычного симплекс-метода):")
                 printTableSim(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                print("Соответствующее решение:")
+                print(solution(b_vector, z_vector, basis, z_answ, target))
+                print()
                 print(f'Разрешающий элемент: {matrix[resolve_row][resolve_col]}')
                 print(f'Выводим из базиса x{basis[resolve_row] + 1}')
                 print(f'Вводим в базис x{resolve_col + 1}')
+                print()
+                x_sols.append([b_vector, basis, z_answ])
                 matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
+                co_vector = None
+                resolve_row = None
+                resolve_col = None
+                print("Таблица № " + str(step) + ":")
                 printTableSim(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                print("Соответствующее решение:")
+                print(solution(b_vector, z_vector, basis, z_answ, target))
+                print()
                 accomp = False
             else:
                 if status != INF_SOLUTION:
+                    print("Таблица № " + str(step) + ":")
                     printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
+                    print("Соответствующее решение:")
+                    print(solution(b_vector, z_vector, basis, z_answ, target))
+                    break
                 resolve_row = None
                 resolve_col = None
                 co_vector = None
@@ -463,8 +492,8 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             if isInf(z_vector, basis): status = INF_SOLUTION
             printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
         
-        print("Соответствующее решение:")
-        print(solution(b_vector, z_vector, basis, z_answ, target))
+        # print("Соответствующее решение:")
+        # print(solution(b_vector, z_vector, basis, z_answ, target))
         if((end and accomp == False) or status == NO_SOLUTION): break
         print()
         if not accomp: 
@@ -474,6 +503,8 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             matrix, b_vector, z_vector, basis, z_answ = new_table(matrix, b_vector, z_vector, z_answ, resolve_row, resolve_col, basis)
     
     # ШАГ 4: Вывод итогового решения
+    # print("DEBUG SOLS:")
+    print(x_sols)
     print()
     print("Итоговое решение:")
     
@@ -490,7 +521,6 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
     else:
         answer += "min"
     answer += " = "
-
     if status == INF_SOLUTION:
         answer += com_solution(x_sols, basis, z_vector, z_answ, target)
     else:
