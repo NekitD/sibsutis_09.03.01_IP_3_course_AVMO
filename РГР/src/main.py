@@ -257,14 +257,14 @@ def com_solution(solutions, final_basis, z_vector, z_answ, target):
     sol_min = all_solutions[0]  # решение с минимальным x1
     sol_max = all_solutions[-1]  # решение с максимальным x1
 
-    print("DEBUG MIN SOL:", end=" ")
-    for i in sol_min:
-        print(i, end=" ")
-    print()
-    print("DEBUG MAX SOL", end=" ")
-    for i in sol_max:
-        print(i, end=" ")
-    print()
+    # print("DEBUG MIN SOL:", end=" ")
+    # for i in sol_min:
+    #     print(i, end=" ")
+    # print()
+    # print("DEBUG MAX SOL", end=" ")
+    # for i in sol_max:
+    #     print(i, end=" ")
+    # print()
     # Разица между макс. и мин. для каждого x
     diff = []
     for i in range(num_real_vars):
