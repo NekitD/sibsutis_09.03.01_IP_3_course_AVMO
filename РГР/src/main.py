@@ -498,6 +498,7 @@ def AmbivalentSimplex(matrix, b_vector, z_vector, target):
             resolve_col = find_res_col(co_vector)
             if resolve_col < 0: status = NO_SOLUTION
             if isInf(z_vector, basis): status = INF_SOLUTION
+            print("Таблица № " + str(step) + ":")
             printTable(matrix, basis, b_vector, z_vector, z_answ, co_vector, resolve_row, resolve_col, target)
         
         if((end and accomp == False) or status == NO_SOLUTION): break
